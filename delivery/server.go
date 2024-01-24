@@ -12,6 +12,7 @@ import (
 
 type Server struct {
 	employeeController *controller.EmployeeControllerImpl
+	facilitiesUC       usecase.FacilitiesUsecase
 	engine             *gin.Engine
 	host               string
 }
@@ -34,6 +35,8 @@ func (s *Server) InitRoute() {
 	// route for management room
 
 	// route for management facilities
+	fg := s.engine.Group("/api/v1/facilities")
+	controller.NewFacilitiesController(s.facilitiesUC, fg).Route()
 
 	// route for management transaction
 }
@@ -53,7 +56,9 @@ func NewServer() *Server {
 	db := config.ConnectDB()
 
 	employeeRepository := repository.NewEmployeeRepository(db)
+	facilitiesRepository := repository.NewFacilitiesRepository(db)
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
+	faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
 	employeeController := controller.NewEmployeeController(employeeUC)
 
 	engine := gin.Default()
@@ -61,6 +66,7 @@ func NewServer() *Server {
 
 	return &Server{
 		employeeController: employeeController,
+		facilitiesUC:       faciltiiesUC,
 		engine:             engine,
 		host:               host,
 	}
