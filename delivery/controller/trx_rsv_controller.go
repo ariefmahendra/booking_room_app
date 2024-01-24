@@ -27,7 +27,8 @@ func (t *TrxRsvController) Route() {
 	t.rg.GET("/get/:id",t.getID)
 	t.rg.GET("/employee/:id",t.getEmployee)
 	t.rg.POST("/", t.createRSVP)
-	t.rg.PUT("/", t.updateRSVP)
+	t.rg.PUT("/", t.acceptRSVP)
+	t.rg.DELETE("/:id", t.deleteRSVP)
 }
 
 func (t *TrxRsvController) getAll(c *gin.Context)  {
@@ -90,7 +91,7 @@ func (t *TrxRsvController) createRSVP(c *gin.Context)  {
 	common.SendCreatedResponse(c, trx, "created")
 }
 
-func (t *TrxRsvController) updateRSVP(c *gin.Context)  {
+func (t *TrxRsvController) acceptRSVP(c *gin.Context)  {
 	// id := c.Param("id")
 	var acc dto.TransactionDTO
 	if err := c.ShouldBindJSON(&acc); err != nil {
@@ -108,5 +109,16 @@ func (t *TrxRsvController) updateRSVP(c *gin.Context)  {
 		return
 	}
 	common.SendCreatedResponse(c, a, "updated")
+}
+
+func (t *TrxRsvController) deleteRSVP(c *gin.Context)  {
+	id := c.Param("id")
+
+	del, err := t.trxRsvpUC.DeleteResv(id)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "Transcaction with ID : " + id + " not found")
+		return
+	}
+	common.SendSingleResponse(c, del, "success")
 }
 

@@ -13,10 +13,16 @@ type TrxRsvUsecase interface {
 	GetEmployee(id string, page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
 	PostReservation(payload dto.PayloadReservationDTO) (dto.TransactionDTO, error)
 	UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error)
+	DeleteResv(id string) (string, error)
 }
 
 type trxRsvUsecase struct {
 	trxRsvRepo repository.TrxRsvRepository
+}
+
+// DeleteResv implements TrxRsvUsecase.
+func (t *trxRsvUsecase) DeleteResv(id string) (string, error) {
+	return t.trxRsvRepo.DeleteResv(id)
 }
 
 // UpdateStatus implements TrxRsvUsecase.

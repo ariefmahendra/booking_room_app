@@ -16,31 +16,42 @@ type TrxRsvRepository interface {
 	GetEmployee(id string, page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
 	PostReservation(payload dto.PayloadReservationDTO) (string, error)
 	UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error)
+	DeleteResv(id string) (string, error)
 }
 
 type trxRsvRepository struct {
 	db *sql.DB
 }
 
-// UpdateStatus implements TrxRsvRepository.
-func (t *trxRsvRepository) UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error) {
-    query := "UPDATE tx_room_reservation SET approval_status = $1, approval_note = $2 WHERE id = $3"
-
-    _, err := t.db.Exec(query, payload.ApproveStatus, payload.ApproveNote, payload.Id)
-    if err != nil {
-        log.Println("trxRsvRepository.UpdateStatus", err.Error())
-        return dto.TransactionDTO{}, err
-    }
-
-    updatedTransaction, err := t.GetID(payload.Id)
-    if err != nil {
-        log.Println("trxRsvRepository.GetTransactionByID", err.Error())
-        return dto.TransactionDTO{}, err
-    }
-
-    return updatedTransaction, nil
+// DeleteResv implements TrxRsvRepository.
+func (t *trxRsvRepository) DeleteResv(id string) (string, error) {
+	query := "UPDATE tx_room_reservation SET deleted_at = (CURRENT_TIMESTAMP) WHERE id = $1"
+	_, err := t.db.Exec(query, id)
+	if err != nil {
+		log.Println("trxRsvRepository.DeleteResv", err.Error())
+		return "", err
+	}
+	return "Reservation Deleted", err
 }
 
+// UpdateStatus implements TrxRsvRepository.
+func (t *trxRsvRepository) UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error) {
+	query := "UPDATE tx_room_reservation SET approval_status = $1, approval_note = $2 WHERE id = $3"
+
+	_, err := t.db.Exec(query, payload.ApproveStatus, payload.ApproveNote, payload.Id)
+	if err != nil {
+		log.Println("trxRsvRepository.UpdateStatus", err.Error())
+		return dto.TransactionDTO{}, err
+	}
+
+	updatedTransaction, err := t.GetID(payload.Id)
+	if err != nil {
+		log.Println("trxRsvRepository.GetTransactionByID", err.Error())
+		return dto.TransactionDTO{}, err
+	}
+
+	return updatedTransaction, nil
+}
 
 // PostReservation implements TrxRsvRepository.
 func (t *trxRsvRepository) PostReservation(payload dto.PayloadReservationDTO) (string, error) {

@@ -42,12 +42,22 @@ func insertFacility(payload model.Transaction, tx *sql.Tx, idRSVP string) {
 	query := "INSERT INTO tx_additional (reservation_id, facilities_id) VALUES ($1, $2) RETURNING id"
 	for _, f := range payload.Facility {
 		_, err := tx.Exec(query, idRSVP, f.Id)
+		updateStatusFacility(f.Id, tx)
 		if err != nil {
 			validate(err, "insertFacility", tx)
 			return
 		}
 	}
 	log.Println("Facilities inserted successfully.")
+}
+
+func updateStatusFacility(id string, tx *sql.Tx) {
+	query :=  "UPDATE   mst_facilities SET status = 'REQUEST' WHERE id = $1"
+	_, err := tx.Exec(query, id)
+	if err != nil {
+		validate(err, "updateFacilityStatus", tx)
+		return
+	}
 }
 
 func validate(err error, message string, tx *sql.Tx)  {
