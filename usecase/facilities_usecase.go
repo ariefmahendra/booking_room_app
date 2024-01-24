@@ -13,7 +13,7 @@ type FacilitiesUsecase interface {
 	ListPaged(page, size int) ([]model.Facilities, shared_model.Paging, error)
 	Get(id string) (model.Facilities, error)
 	GetByName(name string) (model.Facilities, error)
-	GetByType(ftype string) (model.Facilities, error)
+	GetByType(ftype string, page, size int) ([]model.Facilities, shared_model.Paging, error)
 	GetByStatus(status string, page, size int) ([]model.Facilities, shared_model.Paging, error)
 	Create(payload model.Facilities) (model.Facilities, error)
 	Update(payload model.Facilities, id string) (model.Facilities, error)
@@ -71,12 +71,12 @@ func (f *facilitiesUsecase) GetByStatus(status string, page, size int) ([]model.
 }
 
 // usecase for selecting facility by type
-func (f *facilitiesUsecase) GetByType(ftype string) (model.Facilities, error) {
-	facility, err := f.facilitiesRepository.GetType(ftype)
+func (f *facilitiesUsecase) GetByType(ftype string, page, size int) ([]model.Facilities, shared_model.Paging, error) {
+	facility, paging, err := f.facilitiesRepository.GetType(ftype, page, size)
 	if err != nil {
-		return model.Facilities{}, fmt.Errorf("Facility type not found")
+		return []model.Facilities{}, shared_model.Paging{}, fmt.Errorf("Facility type not found")
 	}
-	return facility, err
+	return facility, paging, err
 }
 
 // usecase for creating new facility

@@ -84,12 +84,20 @@ func (f *FacilitiesController) FindFacilityByStatus(c *gin.Context) {
 // Get facility by Facilities Type
 func (f *FacilitiesController) FindFacilityByType(c *gin.Context) {
 	ftype := strings.ToLower(c.Param("FacilitiesType"))
-	facility, err := f.facilitiesUsecase.GetByType(ftype)
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	if page <= 0 {
+		page = 1
+	}
+	if size <= 0 {
+		size = 5
+	}
+	facility, paging, err := f.facilitiesUsecase.GetByType(ftype, page, size)
 	if err != nil {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	common.SendSuccessResponse(c, http.StatusOK, facility)
+	common.SendSuccessPagedResponse(c, http.StatusOK, facility, paging)
 }
 
 // Create new facility
