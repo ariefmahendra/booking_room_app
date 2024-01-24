@@ -150,6 +150,23 @@ func (f *FacilitiesController) DeleteFacilityByName(c *gin.Context) {
 	common.SendSuccessResponse(c, http.StatusOK, nil)
 }
 
+// Get deleted facilities
+func (f *FacilitiesController) FindAllDeletedFacilities(c *gin.Context) {
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	if page <= 0 {
+		page = 1
+	}
+	if size <= 0 {
+		size = 5
+	}
+	facility, paging, err := f.facilitiesUsecase.GetDeleted(page, size)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+	}
+	common.SendSuccessPagedResponse(c, http.StatusOK, facility, paging)
+}
+
 // constructor for facilities controller
 func NewFacilitiesController(facilitiesUsecase usecase.FacilitiesUsecase, fg *gin.RouterGroup) *FacilitiesController {
 	return &FacilitiesController{
@@ -169,4 +186,5 @@ func (f *FacilitiesController) Route() {
 	f.fg.PUT("/:id", f.UpdateFacility)
 	f.fg.DELETE("/:id", f.DeleteFacility)
 	f.fg.DELETE("/name/:codeName", f.DeleteFacilityByName)
+	f.fg.GET("/deleted", f.FindAllDeletedFacilities)
 }

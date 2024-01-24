@@ -22,6 +22,7 @@ type FacilitiesRepository interface {
 	Update(facility model.Facilities, id string) (model.Facilities, error)
 	Delete(id string) error
 	DeleteByName(name string) error
+	GetDeleted(page, size int) ([]model.Facilities, shared_model.Paging, error)
 }
 
 var deletedAt sql.NullString
@@ -34,7 +35,7 @@ type facilitiesRepository struct {
 func (f *facilitiesRepository) List(page, size int) ([]model.Facilities, shared_model.Paging, error) {
 	//set max page
 	totalRows := 0
-	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities").Scan(&totalRows); err != nil {
+	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities WHERE deleted_at IS NULL").Scan(&totalRows); err != nil {
 		return nil, shared_model.Paging{}, err
 	}
 	paging := shared_model.Paging{
@@ -98,7 +99,7 @@ func (f *facilitiesRepository) GetStatus(status string, page, size int) ([]model
 	var facilities []model.Facilities
 	//set max page
 	totalRows := 0
-	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities").Scan(&totalRows); err != nil {
+	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities WHERE status=$1 AND deleted_at IS NULL", status).Scan(&totalRows); err != nil {
 		return nil, shared_model.Paging{}, err
 	}
 	paging := shared_model.Paging{
@@ -141,7 +142,7 @@ func (f *facilitiesRepository) GetType(ftype string, page, size int) ([]model.Fa
 	var facilities []model.Facilities
 	//set max page
 	totalRows := 0
-	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities").Scan(&totalRows); err != nil {
+	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities WHERE facilities_type=$1 AND deleted_at IS NULL", ftype).Scan(&totalRows); err != nil {
 		return nil, shared_model.Paging{}, err
 	}
 	paging := shared_model.Paging{
@@ -164,6 +165,49 @@ func (f *facilitiesRepository) GetType(ftype string, page, size int) ([]model.Fa
 	defer rows.Close()
 
 	// append all facilities data into facilities struct
+	for rows.Next() {
+		var facility model.Facilities
+		if err := rows.Scan(&facility.Id, &facility.CodeName, &facility.FacilitiesType, &facility.Status, &facility.CreatedAt, &facility.UpdatedAt, &deletedAt); err != nil {
+			log.Println("facilitiesRepository.Scan", err.Error())
+			return nil, shared_model.Paging{}, err
+		}
+
+		facilities = append(facilities, facility)
+		if err = rows.Err(); err != nil {
+			return nil, shared_model.Paging{}, err
+		}
+	}
+	return facilities, paging, nil
+}
+
+// Get deleted facility
+func (f *facilitiesRepository) GetDeleted(page, size int) ([]model.Facilities, shared_model.Paging, error) {
+	//set max page
+	totalRows := 0
+	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities WHERE deleted_at IS NOT NULL").Scan(&totalRows); err != nil {
+		return nil, shared_model.Paging{}, err
+	}
+	paging := shared_model.Paging{
+		Page:       page,
+		RowPerPage: size,
+		TotalRows:  totalRows,
+		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+	}
+	if page > paging.TotalPages {
+		page = paging.TotalPages
+		paging.Page = page
+	}
+	offset := (page - 1) * size
+
+	rows, err := f.db.Query("SELECT * FROM mst_facilities WHERE deleted_at IS NOT NULL LIMIT $1 OFFSET $2", size, offset)
+	if err != nil {
+		log.Println("facilitiesRepository.Query", err.Error())
+		return nil, shared_model.Paging{}, err
+	}
+	defer rows.Close()
+
+	// append all facilities data into facilities struct
+	var facilities []model.Facilities
 	for rows.Next() {
 		var facility model.Facilities
 		if err := rows.Scan(&facility.Id, &facility.CodeName, &facility.FacilitiesType, &facility.Status, &facility.CreatedAt, &facility.UpdatedAt, &deletedAt); err != nil {

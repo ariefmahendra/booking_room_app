@@ -19,6 +19,7 @@ type FacilitiesUsecase interface {
 	Update(payload model.Facilities, id string) (model.Facilities, error)
 	Delete(id string) error
 	DeleteByName(name string) error
+	GetDeleted(page, size int) ([]model.Facilities, shared_model.Paging, error)
 }
 
 type facilitiesUsecase struct {
@@ -145,6 +146,15 @@ func (f *facilitiesUsecase) DeleteByName(name string) error {
 		return fmt.Errorf("Failed to delete facility")
 	}
 	return fmt.Errorf("Facility deleted")
+}
+
+// Get deleted facilities
+func (f *facilitiesUsecase) GetDeleted(page, size int) ([]model.Facilities, shared_model.Paging, error) {
+	facility, paging, err := f.facilitiesRepository.GetDeleted(page, size)
+	if err != nil {
+		return []model.Facilities{}, shared_model.Paging{}, fmt.Errorf("Facility not found")
+	}
+	return facility, paging, err
 }
 
 // constructor for facilities usecase
