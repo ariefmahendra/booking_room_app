@@ -20,11 +20,6 @@ type Server struct {
 func (s *Server) InitRoute(){
 	rg := s.engine.Group("/rsvp")
 	controller.NewTrxRsvpController(s.trxRsvpUC, rg).Route()
-	rg.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
 }
 
 func (s *Server) Run() {

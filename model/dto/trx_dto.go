@@ -21,6 +21,14 @@ type TransactionDTO struct {
 type Facility struct{
 	Id string `json:"id"`
 	Code string `json:"code"`
-	Type string `json:"type"`
-	
+	Type string `json:"type"`	
+}
+
+type PayloadReservationDTO struct {
+	Email 		string `json:"email"`
+	RoomCode    string `json:"room_code"`
+	StartDate  	*time.Time `json:"booked_start_date"`
+	EndDate    	*time.Time `json:"booked_end_date"`
+	Note 		string `json:"note"`
+	Facilities 	[]Facility `json:"facilities"`
 }

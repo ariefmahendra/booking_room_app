@@ -3,3 +3,36 @@ X - create transaction - admin, GA
 V - get transactions - admin, GA
 V - get transaction by id - admin, GA, employee
 V - get transaction by employee id - admin, GA, employee
+
+
+{
+  "email": "budi@mail.com",
+  "room_code": "R001",
+  "booked_start_date": "2024-01-25T09:00:00Z",
+  "booked_end_date": "2024-01-27T11:00:00Z",
+  "note": "Team Meeting"
+}
+
+{
+  "email": "budi@mail.com",
+  "room_code": "R001",
+  "booked_start_date": "2024-01-25T09:00:00Z",
+  "booked_end_date": "2024-01-27T11:00:00Z",
+  "note": "Tesss",
+  "facilities": [
+    {
+      "code": "SCR1"
+    },
+    {
+      "code": "PRJ3"
+    }
+  ]
+}
+
+
+
+{
+  "id": "b8898c64-5920-43c2-8486-52ffcc9b5e1f",
+  "approval_status": "decline",
+  "apprv_note": "tes"
+}

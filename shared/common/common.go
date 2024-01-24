@@ -37,7 +37,7 @@ func SendSingleResponse(ctx *gin.Context, data interface{}, message string) {
 
 func SendCreatedResponse(ctx *gin.Context, data interface{}, message string){
 	ctx.JSON(http.StatusOK, shared_model.SingleResponse{
-		Code:    http.StatusOK,
+		Code:    http.StatusCreated,
         Message: message,
         Data:    data,
 	})

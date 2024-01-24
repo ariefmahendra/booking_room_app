@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"booking-room/helper"
+	"booking-room/model"
 	"booking-room/model/dto"
 	"booking-room/shared/shared_model"
 	"database/sql"
@@ -9,17 +11,96 @@ import (
 )
 
 type TrxRsvRepository interface {
-	List(page,size int) ([]dto.TransactionDTO,  shared_model.Paging, error)
+	List(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
 	GetID(id string) (dto.TransactionDTO, error)
-	GetEmployee(id string, page,size int) ([]dto.TransactionDTO, shared_model.Paging, error)
+	GetEmployee(id string, page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
+	PostReservation(payload dto.PayloadReservationDTO) (string, error)
+	UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error)
 }
 
 type trxRsvRepository struct {
 	db *sql.DB
 }
 
+// UpdateStatus implements TrxRsvRepository.
+func (t *trxRsvRepository) UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error) {
+    query := "UPDATE tx_room_reservation SET approval_status = $1, approval_note = $2 WHERE id = $3"
+
+    _, err := t.db.Exec(query, payload.ApproveStatus, payload.ApproveNote, payload.Id)
+    if err != nil {
+        log.Println("trxRsvRepository.UpdateStatus", err.Error())
+        return dto.TransactionDTO{}, err
+    }
+
+    updatedTransaction, err := t.GetID(payload.Id)
+    if err != nil {
+        log.Println("trxRsvRepository.GetTransactionByID", err.Error())
+        return dto.TransactionDTO{}, err
+    }
+
+    return updatedTransaction, nil
+}
+
+
+// PostReservation implements TrxRsvRepository.
+func (t *trxRsvRepository) PostReservation(payload dto.PayloadReservationDTO) (string, error) {
+	var rsvp model.Transaction
+	room_id := ""
+	emply_id := ""
+
+	query := "SELECT id FROM mst_room WHERE code_room = $1"
+	err := t.db.QueryRow(query, payload.RoomCode).Scan(&room_id)
+	if err != nil {
+		log.Println("taskRepository.Query", err.Error())
+		return "", err
+	}
+
+	query = "SELECT id FROM mst_employee WHERE email = $1"
+	err = t.db.QueryRow(query, payload.Email).Scan(&emply_id)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	rsvp.RoomId = room_id
+	rsvp.EmployeeId = emply_id
+	rsvp.StartDate = *payload.StartDate
+	rsvp.EndDate = *payload.EndDate
+	rsvp.Note = payload.Note
+	rsvp.ApproveNote = ""
+
+	if payload.Facilities != nil {
+		for _, dtoFacility := range payload.Facilities {
+			query := "SELECT id FROM mst_facilities WHERE code_name = $1"
+			var facilityID string
+			err := t.db.QueryRow(query, dtoFacility.Code).Scan(&facilityID)
+			if err != nil {
+				log.Println("trxRsvRepository.Query (facility)", err.Error())
+				return "", err
+			}
+
+			facility := model.Facility{
+				Id:   facilityID,
+				Code: dtoFacility.Code,
+				Type: dtoFacility.Type,
+			}
+
+			rsvp.Facility = append(rsvp.Facility, facility)
+		}
+	}
+
+	idRSVP := helper.TxQuery(t.db, rsvp)
+
+	// log.Println(rsvp.RoomId)
+	// log.Println(rsvp.EmployeeId)
+	// log.Println(rsvp.Note)
+	// log.Println(rsvp.Facility)
+	// log.Println(rsvp)
+	return idRSVP, nil
+}
+
 // GetEmployee implements TrxRsvRepository.
-func (t *trxRsvRepository) GetEmployee(id string, page,size int) ([]dto.TransactionDTO, shared_model.Paging, error) {
+func (t *trxRsvRepository) GetEmployee(id string, page, size int) ([]dto.TransactionDTO, shared_model.Paging, error) {
 	var trxEmployee []dto.TransactionDTO
 	offset := (page - 1) * size
 	var err error
@@ -52,18 +133,18 @@ func (t *trxRsvRepository) GetEmployee(id string, page,size int) ([]dto.Transact
 	row := t.db.QueryRow(query, id, size, offset)
 	var emp dto.TransactionDTO
 	if err := row.Scan(
-			&emp.Id,
-			&emp.EmployeeId,
-			&emp.EmplyName,
-			&emp.RoomCode,
-			&emp.StartDate,
-			&emp.EndDate,
-			&emp.Note,
-			&emp.ApproveStatus,
-			&emp.ApproveNote,
-			&emp.CreateAt,
-			&emp.UpdateAt,
-			&emp.DeleteAt,
+		&emp.Id,
+		&emp.EmployeeId,
+		&emp.EmplyName,
+		&emp.RoomCode,
+		&emp.StartDate,
+		&emp.EndDate,
+		&emp.Note,
+		&emp.ApproveStatus,
+		&emp.ApproveNote,
+		&emp.CreateAt,
+		&emp.UpdateAt,
+		&emp.DeleteAt,
 	); err != nil {
 		log.Println("trxRepository.QueryRow", err.Error())
 		return []dto.TransactionDTO{}, shared_model.Paging{}, err
@@ -172,12 +253,12 @@ func (t *trxRsvRepository) GetID(id string) (dto.TransactionDTO, error) {
 }
 
 // List implements TrxRsvRepository.
-func (t *trxRsvRepository) List(page,size int) ([]dto.TransactionDTO, shared_model.Paging, error) {
+func (t *trxRsvRepository) List(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error) {
 	var trxList []dto.TransactionDTO
 	offset := (page - 1) * size
 
-	query := 
-	`SELECT 
+	query :=
+		`SELECT 
 		tx.id, 
 		tx.employee_id, 
 		emp.name, 
@@ -219,7 +300,7 @@ func (t *trxRsvRepository) List(page,size int) ([]dto.TransactionDTO, shared_mod
 		)
 		if err != nil {
 			log.Println("trxRepository.Scan", err.Error())
-			return nil,shared_model.Paging{}, err
+			return nil, shared_model.Paging{}, err
 		}
 
 		queryFacility := `
