@@ -25,15 +25,6 @@ type facilitiesUsecase struct {
 	facilitiesRepository repository.FacilitiesRepository
 }
 
-// usecase for geting all facilities
-/* func (f *facilitiesUsecase) List() ([]model.Facilities, error) {
-	facilites, err := f.facilitiesRepository.List()
-	if err != nil {
-		return nil, fmt.Errorf("Problem with accesing Facilities Data")
-	}
-	return facilites, err
-} */
-
 // usecase for geting all facilities paged
 func (f *facilitiesUsecase) List(page, size int) ([]model.Facilities, shared_model.Paging, error) {
 	facilites, paging, err := f.facilitiesRepository.List(page, size)

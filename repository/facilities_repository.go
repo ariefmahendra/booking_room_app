@@ -30,28 +30,6 @@ type facilitiesRepository struct {
 	db *sql.DB
 }
 
-// Query all facilites
-/* func (f *facilitiesRepository) List() ([]model.Facilities, error) {
-	rows, err := f.db.Query("SELECT * FROM mst_facilities WHERE deleted_at is NULL")
-	if err != nil {
-		log.Println("facilitiesRepository.Query", err.Error())
-		return nil, err
-	}
-	defer rows.Close()
-
-	// append all facilities data into facilities struct
-	var facilities []model.Facilities
-	for rows.Next() {
-		var facility model.Facilities
-		if err := rows.Scan(&facility.Id, &facility.CodeName, &facility.FacilitiesType, &facility.Status, &facility.CreatedAt, &facility.UpdatedAt, &deletedAt); err != nil {
-			log.Println("facilitiesRepository.Scan", err.Error())
-			return nil, err
-		}
-		facilities = append(facilities, facility)
-	}
-	return facilities, nil
-} */
-
 // Query all facilites paged
 func (f *facilitiesRepository) List(page, size int) ([]model.Facilities, shared_model.Paging, error) {
 	//set max page
