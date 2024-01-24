@@ -2,51 +2,66 @@ package delivery
 
 import (
 	"booking-room/config"
+	"booking-room/delivery/controller"
+	"booking-room/repository"
+	"booking-room/usecase"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	engine *gin.Engine
-	host string
+	employeeController *controller.EmployeeControllerImpl
+	engine             *gin.Engine
+	host               string
 }
 
-
-func (s *Server) InitRoute(){
-	rg := s.engine.Group("/")
-	rg.GET("/ping", func(c *gin.Context) {
+func (s *Server) InitRoute() {
+	s.engine.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
+	// route for management employee
+	er := s.engine.Group("/api/v1/employees")
+	er.POST("/", s.employeeController.CreateEmployee)
+	er.PATCH("/:id", s.employeeController.UpdateEmployee)
+	er.DELETE("/:id", s.employeeController.DeleteEmployee)
+	er.GET("/:id", s.employeeController.GetEmployeeById)
+	er.GET("/email/:email", s.employeeController.GetEmployeeByEmail)
+	er.GET("/", s.employeeController.GetEmployees)
+
+	// route for management room
+
+	// route for management facilities
+
+	// route for management transaction
 }
 
 func (s *Server) Run() {
 	s.InitRoute()
-	if err := s.engine.Run(":8080"); err != nil {
-		panic(fmt.Errorf("Failed to start server: %v", err))
+	if err := s.engine.Run(s.host); err != nil {
+		panic(fmt.Errorf("failed to start server: %v", err))
 	}
 }
 
-func NewServer() *Server{
+func NewServer() *Server {
 	cfg, err := config.NewConfig()
-	if err !=nil{
+	if err != nil {
 		panic(fmt.Errorf("config error : %v", err))
 	}
-	config.ConnectDB()
-	// Inject DB ke -> Repository
+	db := config.ConnectDB()
 
-	
-	// Inject Repository ke -> Usecase
+	employeeRepository := repository.NewEmployeeRepository(db)
+	employeeUC := usecase.NewEmployeeUC(employeeRepository)
+	employeeController := controller.NewEmployeeController(employeeUC)
 
-
-	// ROUTE
-		engine := gin.Default()
-		host := fmt.Sprintf(":%s",cfg.ApiPort )
+	engine := gin.Default()
+	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
 	return &Server{
-		engine: engine,
-		host: host,
+		employeeController: employeeController,
+		engine:             engine,
+		host:               host,
 	}
 }

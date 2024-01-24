@@ -12,11 +12,11 @@ type DbConfig struct {
 	Port     string
 	User     string
 	Password string
-	Database  string
+	Database string
 	Driver   string
 }
 
-type ApiConfig struct{
+type ApiConfig struct {
 	ApiPort string
 }
 
@@ -25,20 +25,20 @@ type Config struct {
 	ApiConfig
 }
 
-func (c *Config) ConfigurationDB() error{
+func (c *Config) ConfigurationDB() error {
 	err := godotenv.Load()
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("failed to load .env file")
 	}
 
 	// config db
 	c.DbConfig = DbConfig{
-		Host: os.Getenv("DB_HOST"),
-		Port: os.Getenv("DB_PORT"),
-		User: os.Getenv("DB_USER"),
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		User:     os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PASSWORD"),
 		Database: os.Getenv("DB_NAME"),
-		Driver: os.Getenv("DB_DRIVER"),
+		Driver:   os.Getenv("DB_DRIVER"),
 	}
 	// config PORT app
 	c.ApiConfig = ApiConfig{
@@ -46,18 +46,16 @@ func (c *Config) ConfigurationDB() error{
 	}
 	// another config
 
-	if c.Host == "" ||c.Port == "" ||c.User == "" ||c.Password == "" ||c.Database == "" ||c.Driver == "" ||c.ApiPort == "" {
+	if c.Host == "" || c.Port == "" || c.User == "" || c.Password == "" || c.Database == "" || c.Driver == "" || c.ApiPort == "" {
 		return fmt.Errorf("missing required environmet varible")
 	}
 
 	return nil
 }
 
-
-
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
-	if err := cfg.ConfigurationDB(); err != nil{
+	if err := cfg.ConfigurationDB(); err != nil {
 		return nil, err
 	}
 	return cfg, nil
