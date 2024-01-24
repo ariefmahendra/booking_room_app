@@ -16,7 +16,7 @@ type FacilitiesRepository interface {
 	ListPaged(page, size int) ([]model.Facilities, shared_model.Paging, error)
 	Get(id string) (model.Facilities, error)
 	GetName(name string) (model.Facilities, error)
-	GetStatus(status string) (model.Facilities, error)
+	GetStatus(status string, page, size int) ([]model.Facilities, shared_model.Paging, error)
 	GetType(ftype string) (model.Facilities, error)
 	Create(payload model.Facilities) (model.Facilities, error)
 	Update(facility model.Facilities, id string) (model.Facilities, error)
@@ -112,13 +112,41 @@ func (f *facilitiesRepository) GetName(name string) (model.Facilities, error) {
 }
 
 // Query facility by status
-func (f *facilitiesRepository) GetStatus(status string) (model.Facilities, error) {
-	var facility model.Facilities
-	if err := f.db.QueryRow("SELECT * FROM mst_facilities WHERE status=$1 AND deleted_at IS NULL", status).Scan(&facility.Id, &facility.CodeName, &facility.FacilitiesType, &facility.Status, &facility.CreatedAt, &facility.UpdatedAt, &deletedAt); err != nil {
-		log.Println("facilitiesRepository.Get", err.Error())
-		return model.Facilities{}, err
+func (f *facilitiesRepository) GetStatus(status string, page, size int) ([]model.Facilities, shared_model.Paging, error) {
+	var facilities []model.Facilities
+	offset := (page - 1) * size
+	rows, err := f.db.Query("SELECT * FROM mst_facilities WHERE status=$1 AND deleted_at IS NULL LIMIT $2 OFFSET $3", status, size, offset)
+	if err != nil {
+		log.Println("facilitiesRepository.Query", err.Error())
+		return nil, shared_model.Paging{}, err
 	}
-	return facility, nil
+	defer rows.Close()
+
+	// append all facilities data into facilities struct
+	for rows.Next() {
+		var facility model.Facilities
+		if err := rows.Scan(&facility.Id, &facility.CodeName, &facility.FacilitiesType, &facility.Status, &facility.CreatedAt, &facility.UpdatedAt, &deletedAt); err != nil {
+			log.Println("facilitiesRepository.Scan", err.Error())
+			return nil, shared_model.Paging{}, err
+		}
+
+		facilities = append(facilities, facility)
+		if err = rows.Err(); err != nil {
+			return nil, shared_model.Paging{}, err
+		}
+	}
+	totalRows := 0
+	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities WHERE status=$1 AND deleted_at IS NULL", status).Scan(&totalRows); err != nil {
+		return nil, shared_model.Paging{}, err
+	}
+
+	paging := shared_model.Paging{
+		Page:       page,
+		RowPerPage: size,
+		TotalRows:  totalRows,
+		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+	}
+	return facilities, paging, nil
 }
 
 // Query facility by type

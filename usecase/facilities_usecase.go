@@ -14,7 +14,7 @@ type FacilitiesUsecase interface {
 	Get(id string) (model.Facilities, error)
 	GetByName(name string) (model.Facilities, error)
 	GetByType(ftype string) (model.Facilities, error)
-	GetByStatus(status string) (model.Facilities, error)
+	GetByStatus(status string, page, size int) ([]model.Facilities, shared_model.Paging, error)
 	Create(payload model.Facilities) (model.Facilities, error)
 	Update(payload model.Facilities, id string) (model.Facilities, error)
 	Delete(id string) error
@@ -62,12 +62,12 @@ func (f *facilitiesUsecase) GetByName(name string) (model.Facilities, error) {
 }
 
 // usecase for selecting facility by status
-func (f *facilitiesUsecase) GetByStatus(status string) (model.Facilities, error) {
-	facility, err := f.facilitiesRepository.GetStatus(status)
+func (f *facilitiesUsecase) GetByStatus(status string, page, size int) ([]model.Facilities, shared_model.Paging, error) {
+	facility, paging, err := f.facilitiesRepository.GetStatus(status, page, size)
 	if err != nil {
-		return model.Facilities{}, fmt.Errorf("Status not found")
+		return []model.Facilities{}, shared_model.Paging{}, fmt.Errorf("Status not found")
 	}
-	return facility, err
+	return facility, paging, err
 }
 
 // usecase for selecting facility by type
