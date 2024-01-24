@@ -2,19 +2,24 @@ package delivery
 
 import (
 	"booking-room/config"
+	"booking-room/delivery/controller"
+	"booking-room/repository"
+	"booking-room/usecase"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
+	trxRsvpUC  usecase.TrxRsvUsecase
 	engine *gin.Engine
 	host string
 }
 
 
 func (s *Server) InitRoute(){
-	rg := s.engine.Group("/")
+	rg := s.engine.Group("/rsvp")
+	controller.NewTrxRsvpController(s.trxRsvpUC, rg).Route()
 	rg.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
@@ -34,18 +39,19 @@ func NewServer() *Server{
 	if err !=nil{
 		panic(fmt.Errorf("config error : %v", err))
 	}
-	config.ConnectDB()
+	db := config.ConnectDB()
 	// Inject DB ke -> Repository
-
+		trxRsvpRepo := repository.NewTrxRsvRepository(db)
 	
 	// Inject Repository ke -> Usecase
-
+		trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo)
 
 	// ROUTE
 		engine := gin.Default()
 		host := fmt.Sprintf(":%s",cfg.ApiPort )
 
 	return &Server{
+		trxRsvpUC : trxRsvpUC,
 		engine: engine,
 		host: host,
 	}
