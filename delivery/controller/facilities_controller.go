@@ -20,17 +20,14 @@ type FacilitiesController struct {
 func (f *FacilitiesController) FindAllFacilities(c *gin.Context) {
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	//if query param empty, show all page
-	if page == 0 && size == 0 {
-		facilities, err := f.facilitiesUsecase.List()
-		if err != nil {
-			common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-		common.SendSuccessResponse(c, http.StatusOK, facilities)
-		return
+	//if query param empty
+	if page <= 0 {
+		page = 1
 	}
-	facilities, paging, err := f.facilitiesUsecase.ListPaged(page, size)
+	if size <= 0 {
+		size = 5
+	}
+	facilities, paging, err := f.facilitiesUsecase.List(page, size)
 	if err != nil {
 		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

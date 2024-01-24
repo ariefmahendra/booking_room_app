@@ -9,8 +9,8 @@ import (
 )
 
 type FacilitiesUsecase interface {
-	List() ([]model.Facilities, error)
-	ListPaged(page, size int) ([]model.Facilities, shared_model.Paging, error)
+	//List() ([]model.Facilities, error)
+	List(page, size int) ([]model.Facilities, shared_model.Paging, error)
 	Get(id string) (model.Facilities, error)
 	GetByName(name string) (model.Facilities, error)
 	GetByType(ftype string, page, size int) ([]model.Facilities, shared_model.Paging, error)
@@ -26,17 +26,17 @@ type facilitiesUsecase struct {
 }
 
 // usecase for geting all facilities
-func (f *facilitiesUsecase) List() ([]model.Facilities, error) {
+/* func (f *facilitiesUsecase) List() ([]model.Facilities, error) {
 	facilites, err := f.facilitiesRepository.List()
 	if err != nil {
 		return nil, fmt.Errorf("Problem with accesing Facilities Data")
 	}
 	return facilites, err
-}
+} */
 
 // usecase for geting all facilities paged
-func (f *facilitiesUsecase) ListPaged(page, size int) ([]model.Facilities, shared_model.Paging, error) {
-	facilites, paging, err := f.facilitiesRepository.ListPaged(page, size)
+func (f *facilitiesUsecase) List(page, size int) ([]model.Facilities, shared_model.Paging, error) {
+	facilites, paging, err := f.facilitiesRepository.List(page, size)
 	if err != nil {
 		return nil, shared_model.Paging{}, fmt.Errorf("Problem with accesing Facilities Data")
 	}

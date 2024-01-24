@@ -12,8 +12,8 @@ import (
 )
 
 type FacilitiesRepository interface {
-	List() ([]model.Facilities, error)
-	ListPaged(page, size int) ([]model.Facilities, shared_model.Paging, error)
+	//List() ([]model.Facilities, error)
+	List(page, size int) ([]model.Facilities, shared_model.Paging, error)
 	Get(id string) (model.Facilities, error)
 	GetName(name string) (model.Facilities, error)
 	GetStatus(status string, page, size int) ([]model.Facilities, shared_model.Paging, error)
@@ -31,7 +31,7 @@ type facilitiesRepository struct {
 }
 
 // Query all facilites
-func (f *facilitiesRepository) List() ([]model.Facilities, error) {
+/* func (f *facilitiesRepository) List() ([]model.Facilities, error) {
 	rows, err := f.db.Query("SELECT * FROM mst_facilities WHERE deleted_at is NULL")
 	if err != nil {
 		log.Println("facilitiesRepository.Query", err.Error())
@@ -50,11 +50,27 @@ func (f *facilitiesRepository) List() ([]model.Facilities, error) {
 		facilities = append(facilities, facility)
 	}
 	return facilities, nil
-}
+} */
 
 // Query all facilites paged
-func (f *facilitiesRepository) ListPaged(page, size int) ([]model.Facilities, shared_model.Paging, error) {
+func (f *facilitiesRepository) List(page, size int) ([]model.Facilities, shared_model.Paging, error) {
+	//set max page
+	totalRows := 0
+	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities").Scan(&totalRows); err != nil {
+		return nil, shared_model.Paging{}, err
+	}
+	paging := shared_model.Paging{
+		Page:       page,
+		RowPerPage: size,
+		TotalRows:  totalRows,
+		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+	}
+	if page > paging.TotalPages {
+		page = paging.TotalPages
+		paging.Page = page
+	}
 	offset := (page - 1) * size
+
 	rows, err := f.db.Query("SELECT * FROM mst_facilities WHERE deleted_at IS NULL LIMIT $1 OFFSET $2", size, offset)
 	if err != nil {
 		log.Println("facilitiesRepository.Query", err.Error())
@@ -75,18 +91,6 @@ func (f *facilitiesRepository) ListPaged(page, size int) ([]model.Facilities, sh
 		if err = rows.Err(); err != nil {
 			return nil, shared_model.Paging{}, err
 		}
-	}
-
-	totalRows := 0
-	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities").Scan(&totalRows); err != nil {
-		return nil, shared_model.Paging{}, err
-	}
-
-	paging := shared_model.Paging{
-		Page:       page,
-		RowPerPage: size,
-		TotalRows:  totalRows,
-		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 	return facilities, paging, nil
 }
@@ -114,7 +118,23 @@ func (f *facilitiesRepository) GetName(name string) (model.Facilities, error) {
 // Query facility by status
 func (f *facilitiesRepository) GetStatus(status string, page, size int) ([]model.Facilities, shared_model.Paging, error) {
 	var facilities []model.Facilities
+	//set max page
+	totalRows := 0
+	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities").Scan(&totalRows); err != nil {
+		return nil, shared_model.Paging{}, err
+	}
+	paging := shared_model.Paging{
+		Page:       page,
+		RowPerPage: size,
+		TotalRows:  totalRows,
+		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+	}
+	if page > paging.TotalPages {
+		page = paging.TotalPages
+		paging.Page = page
+	}
 	offset := (page - 1) * size
+
 	rows, err := f.db.Query("SELECT * FROM mst_facilities WHERE status=$1 AND deleted_at IS NULL LIMIT $2 OFFSET $3", status, size, offset)
 	if err != nil {
 		log.Println("facilitiesRepository.Query", err.Error())
@@ -135,24 +155,29 @@ func (f *facilitiesRepository) GetStatus(status string, page, size int) ([]model
 			return nil, shared_model.Paging{}, err
 		}
 	}
-	totalRows := 0
-	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities WHERE status=$1 AND deleted_at IS NULL", status).Scan(&totalRows); err != nil {
-		return nil, shared_model.Paging{}, err
-	}
-
-	paging := shared_model.Paging{
-		Page:       page,
-		RowPerPage: size,
-		TotalRows:  totalRows,
-		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
-	}
 	return facilities, paging, nil
 }
 
 // Query facility by type
 func (f *facilitiesRepository) GetType(ftype string, page, size int) ([]model.Facilities, shared_model.Paging, error) {
 	var facilities []model.Facilities
+	//set max page
+	totalRows := 0
+	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities").Scan(&totalRows); err != nil {
+		return nil, shared_model.Paging{}, err
+	}
+	paging := shared_model.Paging{
+		Page:       page,
+		RowPerPage: size,
+		TotalRows:  totalRows,
+		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+	}
+	if page > paging.TotalPages {
+		page = paging.TotalPages
+		paging.Page = page
+	}
 	offset := (page - 1) * size
+
 	rows, err := f.db.Query("SELECT * FROM mst_facilities WHERE facilities_type=$1 AND deleted_at IS NULL LIMIT $2 OFFSET $3", ftype, size, offset)
 	if err != nil {
 		log.Println("facilitiesRepository.Query", err.Error())
@@ -172,17 +197,6 @@ func (f *facilitiesRepository) GetType(ftype string, page, size int) ([]model.Fa
 		if err = rows.Err(); err != nil {
 			return nil, shared_model.Paging{}, err
 		}
-	}
-	totalRows := 0
-	if err := f.db.QueryRow("SELECT COUNT (*) FROM mst_facilities WHERE facilities_type=$1 AND deleted_at IS NULL", ftype).Scan(&totalRows); err != nil {
-		return nil, shared_model.Paging{}, err
-	}
-
-	paging := shared_model.Paging{
-		Page:       page,
-		RowPerPage: size,
-		TotalRows:  totalRows,
-		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 	return facilities, paging, nil
 }
