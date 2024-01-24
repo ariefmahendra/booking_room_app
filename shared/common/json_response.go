@@ -21,3 +21,14 @@ func SendSuccessResponse(ctx *gin.Context, code int, data any) {
 		Data: data,
 	})
 }
+
+func SendSuccessPagedResponse(ctx *gin.Context, code int, data any, paging shared_model.Paging) {
+	ctx.JSON(code, shared_model.PagedResponse{
+		Status: shared_model.Status{
+			Code:    code,
+			Message: "success",
+		},
+		Data:   data,
+		Paging: paging,
+	})
+}

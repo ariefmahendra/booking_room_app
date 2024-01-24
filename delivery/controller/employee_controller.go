@@ -3,7 +3,6 @@ package controller
 import (
 	"booking-room/model/dto"
 	"booking-room/shared/common"
-	"booking-room/shared/shared_model"
 	"booking-room/usecase"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -117,14 +116,5 @@ func (e *EmployeeControllerImpl) GetEmployees(ctx *gin.Context) {
 		return
 	}
 
-	response := shared_model.PagedResponse{
-		Status: shared_model.Status{
-			Code:    http.StatusOK,
-			Message: "success",
-		},
-		Data:   employees,
-		Paging: paging,
-	}
-
-	common.SendSuccessResponse(ctx, http.StatusOK, response)
+	common.SendSuccessPagedResponse(ctx, http.StatusOK, employees, paging)
 }
