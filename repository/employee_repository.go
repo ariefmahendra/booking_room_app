@@ -73,7 +73,7 @@ func (e *EmployeeRepositoryImpl) GetEmployeeById(id string) (model.EmployeeModel
 func (e *EmployeeRepositoryImpl) GetEmployeeByEmail(email string) (model.EmployeeModel, error) {
 	var employee model.EmployeeModel
 
-	err := e.db.QueryRow(config.RawQueryGetEmployeeByEmail, email).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
+	err := e.db.QueryRow(config.RawQueryGetEmployeeByEmail, email).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Password, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
 
 	if err != nil {
 		return model.EmployeeModel{}, err
@@ -110,10 +110,10 @@ func (e *EmployeeRepositoryImpl) GetEmployees(page, size int) ([]model.EmployeeM
 	}
 
 	paging = shared_model.Paging{
-		Page:       page,
+		Page:        page,
 		RowsPerPage: size,
-		TotalRows:  totalRows,
-		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+		TotalRows:   totalRows,
+		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 
 	return employees, paging, nil

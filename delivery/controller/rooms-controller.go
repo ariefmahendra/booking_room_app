@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"booking-room/delivery/middleware"
 	"booking-room/model"
 	"booking-room/shared/common"
 	"booking-room/usecase"
@@ -13,8 +14,9 @@ import (
 )
 
 type RoomController struct {
-	roomUC usecase.RoomUseCase
-	rg     *gin.RouterGroup
+	roomUC     usecase.RoomUseCase
+	middleware *middleware.Middleware
+	rg         *gin.RouterGroup
 }
 
 func (r *RoomController) Route() {
@@ -24,7 +26,6 @@ func (r *RoomController) Route() {
 	r.rg.GET("/:id", r.getHandler)
 }
 
-// sudah benar
 func (r *RoomController) getHandler(c *gin.Context) {
 	id := c.Param("id")
 	room, err := r.roomUC.FindRoomById(id)
@@ -36,6 +37,11 @@ func (r *RoomController) getHandler(c *gin.Context) {
 }
 
 func (r *RoomController) createHandler(c *gin.Context) {
+	claims := r.middleware.GetUser(c)
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
 	var payload model.Room
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		log.Println("Error binding JSON:", err.Error())
@@ -54,6 +60,12 @@ func (r *RoomController) createHandler(c *gin.Context) {
 }
 
 func (r *RoomController) updateHandler(c *gin.Context) {
+	claims := r.middleware.GetUser(c)
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
+
 	var payload model.Room
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
