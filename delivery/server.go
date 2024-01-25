@@ -4,6 +4,7 @@ import (
 	"booking-room/config"
 	"booking-room/delivery/controller"
 	"booking-room/repository"
+	"booking-room/shared/service"
 	"booking-room/usecase"
 	"fmt"
 
@@ -57,9 +58,13 @@ func NewServer() *Server {
 
 	employeeRepository := repository.NewEmployeeRepository(db)
 	facilitiesRepository := repository.NewFacilitiesRepository(db)
+
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
 	faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
+
 	employeeController := controller.NewEmployeeController(employeeUC)
+
+	service.NewJwtService(cfg.TokenConfig)
 
 	engine := gin.Default()
 	host := fmt.Sprintf(":%s", cfg.ApiPort)

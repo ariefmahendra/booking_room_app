@@ -2,7 +2,10 @@ package config
 
 import (
 	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -20,9 +23,17 @@ type ApiConfig struct {
 	ApiPort string
 }
 
+type TokenConfig struct {
+	IssuerName       string                 `json:"issuerName"`
+	JwtSecretKey     []byte                 `json:"jwtSecretKey"`
+	JwtSigningMethod *jwt.SigningMethodHMAC `json:"jwtSigningMethod"`
+	JwtExpiredTime   time.Duration          `json:"jwtExpiredTime"`
+}
+
 type Config struct {
 	DbConfig
 	ApiConfig
+	TokenConfig
 }
 
 func (c *Config) ConfigurationDB() error {
@@ -44,10 +55,23 @@ func (c *Config) ConfigurationDB() error {
 	c.ApiConfig = ApiConfig{
 		ApiPort: os.Getenv("PORT"),
 	}
-	// another config
 
-	if c.Host == "" || c.Port == "" || c.User == "" || c.Password == "" || c.Database == "" || c.Driver == "" || c.ApiPort == "" {
-		return fmt.Errorf("missing required environmet varible")
+	// another config
+	tokenExpired, err := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME"))
+	if err != nil {
+		return fmt.Errorf("error loading .env file")
+	}
+	
+	// config token
+	c.TokenConfig = TokenConfig{
+		IssuerName:       os.Getenv("ISSUER_NAME"),
+		JwtSecretKey:     []byte(os.Getenv("JWT_SECRET_KEY")),
+		JwtSigningMethod: jwt.SigningMethodHS256,
+		JwtExpiredTime:   time.Duration(tokenExpired) * time.Hour,
+	}
+
+	if c.Host == "" || c.Port == "" || c.User == "" || c.Password == "" || c.Database == "" || c.Driver == "" || c.ApiPort == "" || c.IssuerName == "" || c.JwtSecretKey == nil || c.JwtSigningMethod == nil || tokenExpired == 0 || c.JwtExpiredTime == 0 {
+		return fmt.Errorf("missing required env variables")
 	}
 
 	return nil
