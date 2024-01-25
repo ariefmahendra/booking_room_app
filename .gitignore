@@ -1,7 +1,4 @@
 .env
-<<<<<<< HEAD
 .idea/
-=======
 
-/config
->>>>>>> feat/reservation
+*.xlsx

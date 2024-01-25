@@ -14,6 +14,7 @@ type Server struct {
 	employeeController *controller.EmployeeControllerImpl
 	facilitiesUC       usecase.FacilitiesUsecase
 	trxRsvpUC          usecase.TrxRsvUsecase
+	reportUC           usecase.ReportUsecase
 	engine             *gin.Engine
 	host               string
 }
@@ -37,6 +38,9 @@ func (s *Server) InitRoute() {
 	fg := s.engine.Group("/api/v1/facilities")
 	controller.NewFacilitiesController(s.facilitiesUC, fg).Route()
 
+	rp := s.engine.Group("/api/v1/report")
+	controller.NewReportController(s.reportUC, rp).Route()
+
 	// route for management transaction
 }
 
@@ -58,10 +62,12 @@ func NewServer() *Server {
 	employeeRepository := repository.NewEmployeeRepository(db)
 	facilitiesRepository := repository.NewFacilitiesRepository(db)
 	trxRsvpRepo := repository.NewTrxRsvRepository(db)
+	reportRepo := repository.NewReportRepository(db)
 
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
 	facilitiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
 	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo)
+	reportUC := usecase.NewReportUsecase(reportRepo)
 
 	employeeController := controller.NewEmployeeController(employeeUC)
 
@@ -72,6 +78,7 @@ func NewServer() *Server {
 		employeeController: employeeController,
 		facilitiesUC:       facilitiesUC,
 		trxRsvpUC:          trxRsvpUC,
+		reportUC:           reportUC,
 		engine:             engine,
 		host:               host,
 	}

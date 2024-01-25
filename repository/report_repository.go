@@ -4,15 +4,16 @@ import (
 	"booking-room/model"
 	"database/sql"
 	"log"
+	"time"
 )
 
 type ReportRepository interface {
 	FindAll() ([]model.EmployeeList, error)
 	FindAllRoom() ([]model.RoomList, error)
 	FindAllFacilities() ([]model.FacilitiesList, error)
-	ReservationReport() ([]model.ReservationReport, error)
-	FacilityTotalReserved() ([]model.FacilityTotalReserved, error)
-	RoomTotalReserved() ([]model.RoomTotalReserved, error)
+	ReservationReport(start, end time.Time) ([]model.ReservationReport, error)
+	FacilityTotalReserved(start, end time.Time) ([]model.FacilityTotalReserved, error)
+	RoomTotalReserved(start, end time.Time) ([]model.RoomTotalReserved, error)
 }
 
 type reportRepository struct {
@@ -61,7 +62,7 @@ func (r *reportRepository) FindAllRoom() ([]model.RoomList, error) {
 
 func (r *reportRepository) FindAllFacilities() ([]model.FacilitiesList, error) {
 	var Facilities []model.FacilitiesList
-	rows, err := r.db.Query("SELECT code_name, facility_type, status FROM mst_facilities WHERE deleted_at IS NULL")
+	rows, err := r.db.Query("SELECT code_name, facilities_type, status FROM mst_facilities WHERE deleted_at IS NULL")
 	if err != nil {
 		log.Println("reportRepository.FindAllFacilities", err.Error())
 		return nil, err
@@ -77,7 +78,7 @@ func (r *reportRepository) FindAllFacilities() ([]model.FacilitiesList, error) {
 	return Facilities, nil
 }
 
-func (r *reportRepository) ReservationReport() ([]model.ReservationReport, error) {
+func (r *reportRepository) ReservationReport(start, end time.Time) ([]model.ReservationReport, error) {
 	var Reports []model.ReservationReport
 	sqlquery := `SELECT
 					rr.id AS reservation_id,
@@ -93,8 +94,10 @@ func (r *reportRepository) ReservationReport() ([]model.ReservationReport, error
 				JOIN
 					mst_employee e ON rr.employee_id = e.id
 				JOIN
-					mst_room r ON rr.room_id = r.id;`
-	rows, err := r.db.Query(sqlquery)
+					mst_room r ON rr.room_id = r.id
+				WHERE 
+					rr.start_date > $1 AND rr.start_date < $2;`
+	rows, err := r.db.Query(sqlquery, start, end)
 	if err != nil {
 		log.Println("reportRepository.FindAllReservationReport", err.Error())
 		return nil, err
@@ -103,7 +106,7 @@ func (r *reportRepository) ReservationReport() ([]model.ReservationReport, error
 	for rows.Next() {
 		var report model.ReservationReport
 		if err := rows.Scan(&report.ReservationId, &report.EmployeeName, &report.CodeRoom, &report.StartDate, &report.EndDate, &report.Note, &report.ApproveStatus, &report.ApproveNote); err != nil {
-			log.Println("reportRepository.FindAllReservationReport", err.Error())
+			log.Println("reportRepository.FindAllReservationReportAppend", err.Error())
 		}
 		rows2, err := r.db.Query(`SELECT
 									f.facilities_type,
@@ -115,18 +118,18 @@ func (r *reportRepository) ReservationReport() ([]model.ReservationReport, error
 								JOIN
 									mst_facilities f ON a.facilities_id = f.id
 								WHERE
-									rr.start_date >= '2024-01-01' AND rr.end_date < '2024-03-01'
+									rr.start_date >= $2 AND rr.end_date < $3 AND rr.id = $1
 								GROUP BY
-									f.facilities_type; WHERE rr.id = $1;`, report.ReservationId)
+									f.facilities_type;`, report.ReservationId, start, end)
 		if err != nil {
-			log.Println("reportRepository.FindAllReservationReport", err.Error())
+			log.Println("reportRepository.FindAllReservationReportDetail", err.Error())
 		}
 		defer rows2.Close()
 		additionals := []model.AdditionalReport{}
 		for rows2.Next() {
 			var additional model.AdditionalReport
 			if err := rows2.Scan(&additional.FacilitiesName); err != nil {
-				log.Println("reportRepository.FindAllReservationReport", err.Error())
+				log.Println("reportRepository.FindAllReservationReportDetailAppend", err.Error())
 			}
 			additionals = append(additionals, additional)
 		}
@@ -136,7 +139,7 @@ func (r *reportRepository) ReservationReport() ([]model.ReservationReport, error
 	return Reports, nil
 }
 
-func (r *reportRepository) FacilityTotalReserved() ([]model.FacilityTotalReserved, error) {
+func (r *reportRepository) FacilityTotalReserved(start, end time.Time) ([]model.FacilityTotalReserved, error) {
 	var FacilityTotalReserved []model.FacilityTotalReserved
 	rows, err := r.db.Query(`SELECT
 								f.facilities_type,
@@ -148,9 +151,9 @@ func (r *reportRepository) FacilityTotalReserved() ([]model.FacilityTotalReserve
 							JOIN
 								mst_facilities f ON a.facilities_id = f.id
 							WHERE
-								rr.start_date >= '2024-01-01' AND rr.end_date < '2024-03-01'
+								rr.start_date >= $1 AND rr.end_date < $2
 							GROUP BY
-								f.facilities_type;`)
+								f.facilities_type;`, start, end)
 	if err != nil {
 		log.Println("reportRepository.FacilityTotalReserved", err.Error())
 		return nil, err
@@ -166,7 +169,7 @@ func (r *reportRepository) FacilityTotalReserved() ([]model.FacilityTotalReserve
 	return FacilityTotalReserved, nil
 }
 
-func (r *reportRepository) RoomTotalReserved() ([]model.RoomTotalReserved, error) {
+func (r *reportRepository) RoomTotalReserved(start, end time.Time) ([]model.RoomTotalReserved, error) {
 	var RoomTotalReserved []model.RoomTotalReserved
 	rows, err := r.db.Query(`SELECT
 								r.room_type,
@@ -176,9 +179,9 @@ func (r *reportRepository) RoomTotalReserved() ([]model.RoomTotalReserved, error
 							JOIN
 								mst_room r ON rr.room_id = r.id
 							WHERE
-								rr.start_date >= '2024-01-01' AND rr.end_date < '2024-03-01'
+								rr.start_date >= $1 AND rr.end_date < $2
 							GROUP BY
-								r.room_type;`)
+								r.room_type;`, start, end)
 	if err != nil {
 		log.Println("reportRepository.RoomTotalReserved", err.Error())
 	}
