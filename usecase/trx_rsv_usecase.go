@@ -15,6 +15,7 @@ type TrxRsvUsecase interface {
 	UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error)
 	DeleteResv(id string) (string, error)
 	GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
+	UpdateResv(payload dto.PayloadReservationDTO) (dto.TransactionDTO, error)
 }
 
 type trxRsvUsecase struct {

@@ -18,10 +18,51 @@ type TrxRsvRepository interface {
 	UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error)
 	DeleteResv(id string) (string, error)
 	GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
+	UpdateResv(payload dto.PayloadReservationDTO) (string, error)
 }
 
 type trxRsvRepository struct {
 	db *sql.DB
+}
+
+// UpdateResv implements TrxRsvRepository.
+func (t *trxRsvRepository) UpdateResv(payload dto.PayloadReservationDTO) (string, error) {
+	var rsvp model.Transaction
+	room_id := ""
+
+	query := "SELECT id FROM mst_room WHERE code_room = $1"
+	err := t.db.QueryRow(query, payload.RoomCode).Scan(&room_id)
+	if err != nil {
+		log.Println("taskRepository.Query", err.Error())
+		return "", err
+	}
+
+	rsvp.Id = payload.Id
+	rsvp.RoomId = room_id
+	rsvp.StartDate = *payload.StartDate
+	rsvp.EndDate = *payload.EndDate
+	rsvp.Note = payload.Note
+
+	if payload.Facilities != nil {
+		for _, dtoFacility := range payload.Facilities {
+			query := "SELECT id FROM mst_facilities WHERE code_name = $1"
+			var facilityID string
+			err := t.db.QueryRow(query, dtoFacility.Code).Scan(&facilityID)
+			if err != nil {
+				log.Println("trxRsvRepository.Query (facility)", err.Error())
+				return "", err
+			}
+
+			facility := model.Facility{
+				Id:   facilityID,
+				Code: dtoFacility.Code,
+				Type: dtoFacility.Type,
+			}
+
+			rsvp.Facility = append(rsvp.Facility, facility)
+		}
+	}
+	return "", nil
 }
 
 // GetApprovalList implements TrxRsvRepository.

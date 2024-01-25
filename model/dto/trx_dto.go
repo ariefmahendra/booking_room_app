@@ -25,6 +25,7 @@ type Facility struct{
 }
 
 type PayloadReservationDTO struct {
+	Id         string `json:"id"`
 	Email 		string `json:"email"`
 	RoomCode    string `json:"room_code"`
 	StartDate  	*time.Time `json:"booked_start_date"`
