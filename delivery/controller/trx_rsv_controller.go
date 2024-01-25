@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"booking-room/model/dto"
 	"booking-room/shared/common"
 	"booking-room/usecase"
 	"net/http"
@@ -22,9 +23,12 @@ func NewTrxRsvpController(trxRsvpUC usecase.TrxRsvUsecase, rg *gin.RouterGroup) 
 }
 
 func (t *TrxRsvController) Route() {
-	t.rg.GET("/list", t.getAll)
+	t.rg.GET("/", t.getAll)
 	t.rg.GET("/get/:id", t.getID)
 	t.rg.GET("/employee/:id", t.getEmployee)
+	t.rg.POST("/", t.createRSVP)
+	t.rg.PUT("/", t.acceptRSVP)
+	t.rg.DELETE("/:id", t.deleteRSVP)
 }
 
 func (t *TrxRsvController) getAll(c *gin.Context) {
@@ -65,4 +69,55 @@ func (t *TrxRsvController) getEmployee(c *gin.Context) {
 	}
 
 	common.SendSuccessPagedResponse(c, http.StatusOK, trx, paging)
+}
+
+func (t *TrxRsvController) createRSVP(c *gin.Context) {
+	var payload dto.PayloadReservationDTO
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if payload.Email == "" || payload.RoomCode == "" || payload.Note == "" || payload.StartDate == nil || payload.EndDate == nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "All field must be filled")
+		return
+	}
+
+	trx, err := t.trxRsvpUC.PostReservation(payload)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	common.SendCreatedResponse(c, trx, "created")
+}
+
+func (t *TrxRsvController) acceptRSVP(c *gin.Context) {
+	// id := c.Param("id")
+	var acc dto.TransactionDTO
+	if err := c.ShouldBindJSON(&acc); err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if acc.Id == "" && acc.ApproveStatus == "" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "accesment field failed")
+		return
+	}
+
+	a, err := t.trxRsvpUC.UpdateStatus(acc)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	common.SendCreatedResponse(c, a, "updated")
+}
+
+func (t *TrxRsvController) deleteRSVP(c *gin.Context) {
+	id := c.Param("id")
+
+	del, err := t.trxRsvpUC.DeleteResv(id)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "Transcaction with ID : "+id+" not found")
+		return
+	}
+	common.SendSingleResponse(c, del, "success")
 }

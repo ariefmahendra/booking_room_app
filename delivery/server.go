@@ -11,17 +11,16 @@ import (
 )
 
 type Server struct {
+	roomUC             usecase.RoomUseCase
 	employeeController *controller.EmployeeControllerImpl
 	facilitiesUC       usecase.FacilitiesUsecase
+	roomController     *controller.RoomController
 	trxRsvpUC          usecase.TrxRsvUsecase
 	engine             *gin.Engine
 	host               string
 }
 
 func (s *Server) InitRoute() {
-	rsvp := s.engine.Group("/rsvp")
-	controller.NewTrxRsvpController(s.trxRsvpUC, rsvp).Route()
-
 	// route for management employee
 	er := s.engine.Group("/api/v1/employees")
 	er.POST("/", s.employeeController.CreateEmployee)
@@ -32,12 +31,16 @@ func (s *Server) InitRoute() {
 	er.GET("/", s.employeeController.GetEmployees)
 
 	// route for management room
+	rg := s.engine.Group("/api/v1//room")
+	controller.NewRoomController(s.roomUC, rg).Route()
 
 	// route for management facilities
 	fg := s.engine.Group("/api/v1/facilities")
 	controller.NewFacilitiesController(s.facilitiesUC, fg).Route()
 
 	// route for management transaction
+	rs := s.engine.Group("/api/v1//reservation")
+	controller.NewTrxRsvpController(s.trxRsvpUC, rs).Route()
 }
 
 func (s *Server) Run() {
@@ -55,12 +58,14 @@ func NewServer() *Server {
 
 	db := config.ConnectDB()
 
-	employeeRepository := repository.NewEmployeeRepository(db)
+	roomRepository := repository.NewRoomRepository(db)
 	facilitiesRepository := repository.NewFacilitiesRepository(db)
+	employeeRepository := repository.NewEmployeeRepository(db)
 	trxRsvpRepo := repository.NewTrxRsvRepository(db)
 
+	faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
-	facilitiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
+	roomUC := usecase.NewRoomUseCase(roomRepository)
 	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo)
 
 	employeeController := controller.NewEmployeeController(employeeUC)
@@ -69,8 +74,9 @@ func NewServer() *Server {
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
 	return &Server{
+		roomUC:             roomUC,
 		employeeController: employeeController,
-		facilitiesUC:       facilitiesUC,
+		facilitiesUC:       faciltiiesUC,
 		trxRsvpUC:          trxRsvpUC,
 		engine:             engine,
 		host:               host,

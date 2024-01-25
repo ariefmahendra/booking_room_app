@@ -1,7 +1,3 @@
 .env
-<<<<<<< HEAD
 .idea/
-=======
-
-/config
->>>>>>> feat/reservation
+note.txt
