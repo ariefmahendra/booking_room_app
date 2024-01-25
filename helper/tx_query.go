@@ -52,7 +52,7 @@ func insertFacility(payload model.Transaction, tx *sql.Tx, idRSVP string) {
 }
 
 func updateStatusFacility(id string, tx *sql.Tx) {
-	query :=  "UPDATE   mst_facilities SET status = 'REQUEST' WHERE id = $1"
+	query :=  "UPDATE mst_facilities SET status = 'REQUEST' WHERE id = $1"
 	_, err := tx.Exec(query, id)
 	if err != nil {
 		validate(err, "updateFacilityStatus", tx)

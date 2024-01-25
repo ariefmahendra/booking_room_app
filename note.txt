@@ -1,10 +1,6 @@
-Transaction API
-X - create transaction - admin, GA
-V - get transactions - admin, GA
-V - get transaction by id - admin, GA, employee
-V - get transaction by employee id - admin, GA, employee
+##############   BODY REQUEST BODY JSON   ##############
 
-
+# body request on POST "/rsvp" without facility request
 {
   "email": "budi@mail.com",
   "room_code": "R001",
@@ -13,6 +9,8 @@ V - get transaction by employee id - admin, GA, employee
   "note": "Team Meeting"
 }
 
+
+# body POST "/rsvp" with facility request
 {
   "email": "budi@mail.com",
   "room_code": "R001",
@@ -30,9 +28,15 @@ V - get transaction by employee id - admin, GA, employee
 }
 
 
+# body request on PUT "/rsvp" to approve without apprv_note
+{
+  "id": "b8898c64-5920-43c2-8486-52ffcc9b5e1f",
+  "approval_status": "accept"
+}
 
+# body request on PUT "/rsvp" to approve with apprv_note
 {
   "id": "b8898c64-5920-43c2-8486-52ffcc9b5e1f",
   "approval_status": "decline",
-  "apprv_note": "tes"
+  "apprv_note": "forbidden"
 }
