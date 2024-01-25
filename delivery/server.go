@@ -3,6 +3,7 @@ package delivery
 import (
 	"booking-room/config"
 	"booking-room/delivery/controller"
+	"booking-room/delivery/middleware"
 	"booking-room/repository"
 	"booking-room/shared/service"
 	"booking-room/usecase"
@@ -12,27 +13,28 @@ import (
 )
 
 type Server struct {
-	roomUC             usecase.RoomUseCase
-	employeeController *controller.EmployeeControllerImpl
-	facilitiesUC       usecase.FacilitiesUsecase
-	roomController     *controller.RoomController
-	trxRsvpUC          usecase.TrxRsvUsecase
-	engine             *gin.Engine
-	host               string
+	middleware   *middleware.Middleware
+	authUC       usecase.AuthUC
+	employeeUC   usecase.EmployeeUC
+	roomUC       usecase.RoomUseCase
+	facilitiesUC usecase.FacilitiesUsecase
+	trxRsvpUC    usecase.TrxRsvUsecase
+	engine       *gin.Engine
+	host         string
 }
 
 func (s *Server) InitRoute() {
+	s.engine.Use(s.middleware.NewAuth)
+
+	ar := s.engine.Group("/api/v1/auth")
+	controller.NewAuthController(s.authUC, ar).Route()
+
 	// route for management employee
 	er := s.engine.Group("/api/v1/employees")
-	er.POST("/", s.employeeController.CreateEmployee)
-	er.PATCH("/:id", s.employeeController.UpdateEmployee)
-	er.DELETE("/:id", s.employeeController.DeleteEmployee)
-	er.GET("/:id", s.employeeController.GetEmployeeById)
-	er.GET("/email/:email", s.employeeController.GetEmployeeByEmail)
-	er.GET("/", s.employeeController.GetEmployees)
+	controller.NewEmployeeController(s.employeeUC, er).Route()
 
 	// route for management room
-	rg := s.engine.Group("/api/v1//room")
+	rg := s.engine.Group("/api/v1/room")
 	controller.NewRoomController(s.roomUC, rg).Route()
 
 	// route for management facilities
@@ -40,7 +42,7 @@ func (s *Server) InitRoute() {
 	controller.NewFacilitiesController(s.facilitiesUC, fg).Route()
 
 	// route for management transaction
-	rs := s.engine.Group("/api/v1//reservation")
+	rs := s.engine.Group("/api/v1/reservation")
 	controller.NewTrxRsvpController(s.trxRsvpUC, rs).Route()
 }
 
@@ -69,19 +71,22 @@ func NewServer() *Server {
 	roomUC := usecase.NewRoomUseCase(roomRepository)
 	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo)
 
-	employeeController := controller.NewEmployeeController(employeeUC)
+	jwtService := service.NewJwtService(cfg.TokenConfig)
+	authUC := usecase.NewAuthUC(employeeRepository, jwtService)
 
-	service.NewJwtService(cfg.TokenConfig)
+	newMiddleware := middleware.NewMiddleware(authUC, jwtService)
 
 	engine := gin.Default()
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
 	return &Server{
-		roomUC:             roomUC,
-		employeeController: employeeController,
-		facilitiesUC:       faciltiiesUC,
-		trxRsvpUC:          trxRsvpUC,
-		engine:             engine,
-		host:               host,
+		middleware:   newMiddleware,
+		authUC:       authUC,
+		roomUC:       roomUC,
+		employeeUC:   employeeUC,
+		facilitiesUC: faciltiiesUC,
+		trxRsvpUC:    trxRsvpUC,
+		engine:       engine,
+		host:         host,
 	}
 }

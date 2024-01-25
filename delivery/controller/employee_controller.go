@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"booking-room/delivery/middleware"
 	"booking-room/model/dto"
 	"booking-room/shared/common"
 	"booking-room/usecase"
@@ -8,17 +9,42 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type EmployeeControllerImpl struct {
 	employeeUC usecase.EmployeeUC
+	middleware *middleware.Middleware
+	rg         *gin.RouterGroup
 }
 
-func NewEmployeeController(employeeUC usecase.EmployeeUC) *EmployeeControllerImpl {
-	return &EmployeeControllerImpl{employeeUC: employeeUC}
+func NewEmployeeController(employeeUC usecase.EmployeeUC, rg *gin.RouterGroup) *EmployeeControllerImpl {
+	return &EmployeeControllerImpl{employeeUC: employeeUC, rg: rg}
+}
+
+func (e *EmployeeControllerImpl) Route() {
+	er := e.rg
+	er.POST("/", e.CreateEmployee)
+	er.PATCH("/:id", e.UpdateEmployee)
+	er.DELETE("/:id", e.DeleteEmployee)
+	er.GET("/:id", e.GetEmployeeById)
+	er.GET("/email/:email", e.GetEmployeeByEmail)
+	er.GET("/", e.GetEmployees)
+
 }
 
 func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
+	claims := e.middleware.GetUser(ctx)
+
+	if claims == nil {
+		return
+	}
+
+	if strings.ToUpper(claims.Role) != "ADMIN" {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+		return
+	}
+
 	var employeeReq dto.EmployeeCreateRequest
 
 	err := ctx.Bind(&employeeReq)
@@ -45,6 +71,17 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 }
 
 func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
+	claims := e.middleware.GetUser(ctx)
+
+	if claims == nil {
+		return
+	}
+
+	if strings.ToUpper(claims.Role) != "ADMIN" {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+		return
+	}
+
 	var employeeReq dto.EmployeeCreateRequest
 
 	err := ctx.Bind(&employeeReq)
@@ -69,6 +106,17 @@ func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 }
 
 func (e *EmployeeControllerImpl) DeleteEmployee(ctx *gin.Context) {
+	claims := e.middleware.GetUser(ctx)
+
+	if claims == nil {
+		return
+	}
+
+	if strings.ToUpper(claims.Role) != "ADMIN" {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+		return
+	}
+
 	employeeId := ctx.Param("id")
 
 	err := e.employeeUC.DeleteEmployeeById(employeeId)
@@ -82,6 +130,12 @@ func (e *EmployeeControllerImpl) DeleteEmployee(ctx *gin.Context) {
 }
 
 func (e *EmployeeControllerImpl) GetEmployeeById(ctx *gin.Context) {
+	claims := e.middleware.GetUser(ctx)
+
+	if claims == nil {
+		return
+	}
+
 	employeeId := ctx.Param("id")
 
 	employeeById, err := e.employeeUC.GetEmployeeById(employeeId)
@@ -95,6 +149,12 @@ func (e *EmployeeControllerImpl) GetEmployeeById(ctx *gin.Context) {
 }
 
 func (e *EmployeeControllerImpl) GetEmployeeByEmail(ctx *gin.Context) {
+	claims := e.middleware.GetUser(ctx)
+
+	if claims == nil {
+		return
+	}
+
 	employeeEmail := ctx.Param("email")
 
 	employeeByEmail, err := e.employeeUC.GetEmployeeByEmail(employeeEmail)
@@ -108,6 +168,17 @@ func (e *EmployeeControllerImpl) GetEmployeeByEmail(ctx *gin.Context) {
 }
 
 func (e *EmployeeControllerImpl) GetEmployees(ctx *gin.Context) {
+	claims := e.middleware.GetUser(ctx)
+
+	if claims == nil {
+		return
+	}
+
+	if strings.ToUpper(claims.Role) != "ADMIN" {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+		return
+	}
+
 	pageParam := ctx.Query("page")
 	page, _ := strconv.Atoi(pageParam)
 

@@ -16,7 +16,7 @@ type FacilitiesController struct {
 	fg                *gin.RouterGroup
 }
 
-// Get all facilities
+// FindAllFacilities Get all facilities
 func (f *FacilitiesController) FindAllFacilities(c *gin.Context) {
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
@@ -37,7 +37,7 @@ func (f *FacilitiesController) FindAllFacilities(c *gin.Context) {
 
 }
 
-// Get facility by id
+// FindFacilityById Get facility by id
 func (f *FacilitiesController) FindFacilityById(c *gin.Context) {
 	id := c.Param("id")
 	facility, err := f.facilitiesUsecase.Get(id)
@@ -48,7 +48,7 @@ func (f *FacilitiesController) FindFacilityById(c *gin.Context) {
 	common.SendSuccessResponse(c, http.StatusOK, facility)
 }
 
-// Get facility by name
+// FindFacilityByName Get facility by name
 func (f *FacilitiesController) FindFacilityByName(c *gin.Context) {
 	name := strings.ToUpper(c.Param("codeName"))
 	facility, err := f.facilitiesUsecase.GetByName(name)
@@ -59,7 +59,7 @@ func (f *FacilitiesController) FindFacilityByName(c *gin.Context) {
 	common.SendSuccessResponse(c, http.StatusOK, facility)
 }
 
-// Get facility by status
+// FindFacilityByStatus Get facility by status
 func (f *FacilitiesController) FindFacilityByStatus(c *gin.Context) {
 	status := strings.ToUpper(c.Param("status"))
 	page, _ := strconv.Atoi(c.Query("page"))
@@ -78,7 +78,7 @@ func (f *FacilitiesController) FindFacilityByStatus(c *gin.Context) {
 	common.SendSuccessPagedResponse(c, http.StatusOK, facility, paging)
 }
 
-// Get facility by Facilities Type
+// FindFacilityByType Get facility by Facilities Type
 func (f *FacilitiesController) FindFacilityByType(c *gin.Context) {
 	ftype := strings.ToLower(c.Param("FacilitiesType"))
 	page, _ := strconv.Atoi(c.Query("page"))
@@ -97,7 +97,7 @@ func (f *FacilitiesController) FindFacilityByType(c *gin.Context) {
 	common.SendSuccessPagedResponse(c, http.StatusOK, facility, paging)
 }
 
-// Create new facility
+// CreateFacility Create new facility
 func (f *FacilitiesController) CreateFacility(c *gin.Context) {
 	var payload model.Facilities
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -112,7 +112,7 @@ func (f *FacilitiesController) CreateFacility(c *gin.Context) {
 	common.SendSuccessResponse(c, http.StatusOK, CreateFacility)
 }
 
-// Update facility
+// UpdateFacility Update facility
 func (f *FacilitiesController) UpdateFacility(c *gin.Context) {
 	id := c.Param("id")
 	var payload model.Facilities
@@ -128,7 +128,7 @@ func (f *FacilitiesController) UpdateFacility(c *gin.Context) {
 	common.SendSuccessResponse(c, http.StatusOK, facility)
 }
 
-// Delete facility by id
+// DeleteFacility Delete facility by id
 func (f *FacilitiesController) DeleteFacility(c *gin.Context) {
 	id := c.Param("id")
 	err := f.facilitiesUsecase.Delete(id)
@@ -139,7 +139,7 @@ func (f *FacilitiesController) DeleteFacility(c *gin.Context) {
 	common.SendSuccessResponse(c, http.StatusOK, nil)
 }
 
-// Delete facility by name
+// DeleteFacilityByName Delete facility by name
 func (f *FacilitiesController) DeleteFacilityByName(c *gin.Context) {
 	name := strings.ToUpper(c.Param("codeName"))
 	err := f.facilitiesUsecase.DeleteByName(name)
@@ -150,7 +150,7 @@ func (f *FacilitiesController) DeleteFacilityByName(c *gin.Context) {
 	common.SendSuccessResponse(c, http.StatusOK, nil)
 }
 
-// Get deleted facilities
+// FindAllDeletedFacilities Get deleted facilities
 func (f *FacilitiesController) FindAllDeletedFacilities(c *gin.Context) {
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
@@ -167,7 +167,7 @@ func (f *FacilitiesController) FindAllDeletedFacilities(c *gin.Context) {
 	common.SendSuccessPagedResponse(c, http.StatusOK, facility, paging)
 }
 
-// constructor for facilities controller
+// NewFacilitiesController constructor for facilities controller
 func NewFacilitiesController(facilitiesUsecase usecase.FacilitiesUsecase, fg *gin.RouterGroup) *FacilitiesController {
 	return &FacilitiesController{
 		facilitiesUsecase: facilitiesUsecase,
@@ -175,7 +175,7 @@ func NewFacilitiesController(facilitiesUsecase usecase.FacilitiesUsecase, fg *gi
 	}
 }
 
-// setup route for facilities
+// Route setup route for facilities
 func (f *FacilitiesController) Route() {
 	f.fg.GET("/", f.FindAllFacilities)
 	f.fg.GET("/id/:id", f.FindFacilityById)

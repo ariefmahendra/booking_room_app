@@ -24,7 +24,6 @@ func (r *RoomController) Route() {
 	r.rg.GET("/:id", r.getHandler)
 }
 
-// sudah benar
 func (r *RoomController) getHandler(c *gin.Context) {
 	id := c.Param("id")
 	room, err := r.roomUC.FindRoomById(id)
