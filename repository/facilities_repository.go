@@ -39,10 +39,10 @@ func (f *facilitiesRepository) List(page, size int) ([]model.Facilities, shared_
 		return nil, shared_model.Paging{}, err
 	}
 	paging := shared_model.Paging{
-		Page:       page,
-		RowPerPage: size,
-		TotalRows:  totalRows,
-		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+		Page:        page,
+		RowsPerPage: size,
+		TotalRows:   totalRows,
+		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 	if page > paging.TotalPages {
 		page = paging.TotalPages
@@ -103,10 +103,10 @@ func (f *facilitiesRepository) GetStatus(status string, page, size int) ([]model
 		return nil, shared_model.Paging{}, err
 	}
 	paging := shared_model.Paging{
-		Page:       page,
-		RowPerPage: size,
-		TotalRows:  totalRows,
-		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+		Page:        page,
+		RowsPerPage: size,
+		TotalRows:   totalRows,
+		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 	if page > paging.TotalPages {
 		page = paging.TotalPages
@@ -146,10 +146,10 @@ func (f *facilitiesRepository) GetType(ftype string, page, size int) ([]model.Fa
 		return nil, shared_model.Paging{}, err
 	}
 	paging := shared_model.Paging{
-		Page:       page,
-		RowPerPage: size,
-		TotalRows:  totalRows,
-		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+		Page:        page,
+		RowsPerPage: size,
+		TotalRows:   totalRows,
+		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 	if page > paging.TotalPages {
 		page = paging.TotalPages
@@ -188,10 +188,10 @@ func (f *facilitiesRepository) GetDeleted(page, size int) ([]model.Facilities, s
 		return nil, shared_model.Paging{}, err
 	}
 	paging := shared_model.Paging{
-		Page:       page,
-		RowPerPage: size,
-		TotalRows:  totalRows,
-		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
+		Page:        page,
+		RowsPerPage: size,
+		TotalRows:   totalRows,
+		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 	if page > paging.TotalPages {
 		page = paging.TotalPages

@@ -2,6 +2,8 @@ package common
 
 import (
 	"booking-room/shared/shared_model"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,5 +32,19 @@ func SendSuccessPagedResponse(ctx *gin.Context, code int, data any, paging share
 		},
 		Data:   data,
 		Paging: paging,
+	})
+}
+
+func SendNoContentResponse(c *gin.Context) {
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func SendListResponse(c *gin.Context, data interface{}, message string) {
+	c.JSON(http.StatusOK, &shared_model.ListResponse{
+		Status: shared_model.Status{
+			Code:    http.StatusOK,
+			Message: message,
+		},
+		Data: data,
 	})
 }
