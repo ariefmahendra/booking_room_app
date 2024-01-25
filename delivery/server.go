@@ -74,8 +74,9 @@ func NewServer() *Server {
 	faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
 	roomUC := usecase.NewRoomUseCase(roomRepository)
-	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo)
 	reportUC := usecase.NewReportUsecase(reportRepo)
+	roomUC = usecase.NewRoomUseCase(roomRepository)	  
+	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo, roomUC)
 
 	jwtService := service.NewJwtService(cfg.TokenConfig)
 	authUC := usecase.NewAuthUC(employeeRepository, jwtService)

@@ -25,12 +25,15 @@ func NewTrxRsvpController(trxRsvpUC usecase.TrxRsvUsecase, rg *gin.RouterGroup) 
 }
 
 func (t *TrxRsvController) Route() {
-	t.rg.GET("/", t.getAll)
-	t.rg.GET("/get/:id", t.getID)
-	t.rg.GET("/employee/:id", t.getEmployee)
+	t.rg.GET("/",t.getAll )
+	t.rg.GET("/get/:id",t.getID)
+	t.rg.GET("/employee/:id",t.getEmployee)
+	t.rg.GET("/approval",t.getApprove)
+	t.rg.PUT("/approval", t.acceptRSVP)
 	t.rg.POST("/", t.createRSVP)
-	t.rg.PUT("/", t.acceptRSVP)
+	// t.rg.PUT("/:id", t.editRSVP)
 	t.rg.DELETE("/:id", t.deleteRSVP)
+	t.rg.GET("/avaible",t.getAvaible)
 }
 
 func (t *TrxRsvController) getAll(c *gin.Context) {
@@ -62,7 +65,7 @@ func (t *TrxRsvController) getID(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, "Transcaction with ID : "+id+" not found")
 		return
 	}
-	common.SendSuccessResponse(c, http.StatusOK, trx)
+	common.SendSuccessResponse(c, http.StatusOK,trx)
 }
 
 func (t *TrxRsvController) getEmployee(c *gin.Context) {
@@ -92,7 +95,7 @@ func (t *TrxRsvController) createRSVP(c *gin.Context) {
 		return
 	}
 
-	if payload.Email == "" || payload.RoomCode == "" || payload.Note == "" || payload.StartDate == nil || payload.EndDate == nil {
+	if payload.Id != "" || payload.Email == "" || payload.RoomCode == "" || payload.Note == "" || payload.StartDate == nil || payload.EndDate == nil{
 		common.SendErrorResponse(c, http.StatusBadRequest, "All field must be filled")
 		return
 	}
@@ -102,7 +105,7 @@ func (t *TrxRsvController) createRSVP(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	common.SendCreatedResponse(c, trx, "created")
+	common.SendSuccessResponse(c, http.StatusCreated, trx)
 }
 
 func (t *TrxRsvController) acceptRSVP(c *gin.Context) {
@@ -141,4 +144,68 @@ func (t *TrxRsvController) deleteRSVP(c *gin.Context) {
 		return
 	}
 	common.SendSingleResponse(c, del, "success")
+}
+
+func (t *TrxRsvController) getApprove(c *gin.Context)  {
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	list, paging, err := t.trxRsvpUC.GetApprovalList(page,size)
+	if err != nil{
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	var response []interface{}
+	for _, v := range list{
+		response = append(response, v)
+	}
+	common.SendPagedResponse(c, response, paging, "success")
+}
+
+func (t *TrxRsvController) editRSVP(c *gin.Context)  {
+	id := c.Param("id")
+
+	trx, err := t.trxRsvpUC.GetID(id)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "Transcaction with ID : " + id + " not found")
+		return
+	}
+	
+	var payload dto.PayloadReservationDTO
+	payload.Id = trx.Id
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if payload.Email != ""{
+		common.SendErrorResponse(c, http.StatusBadRequest, "Cant change user reservation")
+		return
+	}
+	if payload.RoomCode == "" || payload.Note == "" || payload.StartDate == nil || payload.EndDate == nil{
+		common.SendErrorResponse(c, http.StatusBadRequest, "All field must be filled")
+		return
+	}
+	// trx, err := t.trxRsvpUC.UpdateResv(payload)
+	// if err != nil {
+	// 	common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+	// 	return
+	// }
+	// common.SendCreatedResponse(c, trx, "updated")
+
+	common.SendSuccessResponse(c, http.StatusOK, payload)
+}
+
+func (t *TrxRsvController) getAvaible(c *gin.Context)  {
+	var avble dto.PayloadAvailable
+	if err := c.ShouldBindJSON(&avble); err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if avble.StartDate == "" && avble.EndDate == "" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "required time range")
+		return
+	}
+	
+	response, _ :=t.trxRsvpUC.GetAvailableRoom(avble)
+	common.SendSuccessResponse(c, http.StatusOK, response)
 }
