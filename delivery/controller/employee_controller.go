@@ -29,6 +29,11 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 
 	employee := common.RequestToEmployeeModel(employeeReq)
 
+	if ok := common.ValidateEmail(employee.Email); ok == false {
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email")
+		return
+	}
+
 	employeeDto, err := e.employeeUC.CreteEmployee(employee)
 	if err != nil {
 		fmt.Printf("failed to create employee : %v", err)

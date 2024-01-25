@@ -7,6 +7,7 @@ import (
 	"booking-room/shared/common"
 	"booking-room/shared/shared_model"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
 
@@ -30,9 +31,14 @@ func NewEmployeeUC(employeeRepo repository.EmployeeRepository) EmployeeUC {
 func (e *EmployeeUCImpl) CreteEmployee(payload model.EmployeeModel) (dto.EmployeeResponse, error) {
 	payload.Role = strings.ToUpper(payload.Role)
 
+	PasswordBytes, err := bcrypt.GenerateFromPassword([]byte(payload.Password), 14)
+
+	payload.Password = string(PasswordBytes)
+
 	employee, err := e.employeeRepo.InsertEmployee(payload)
 	if err != nil {
-		return dto.EmployeeResponse{}, fmt.Errorf("CreateEmployee.Usecase : %v", err)
+		fmt.Printf("ereateEmployee.Usecase : %v", err)
+		return dto.EmployeeResponse{}, err
 	}
 
 	employeeDto := common.EmployeeModelToResponse(employee)

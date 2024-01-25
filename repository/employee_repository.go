@@ -43,7 +43,7 @@ func (e *EmployeeRepositoryImpl) UpdateEmployee(payload model.EmployeeModel) (mo
 
 	err := e.db.QueryRow(config.RawUpdateEmployeeById, payload.Name, payload.Email, payload.Password, payload.Division, payload.Position, payload.Role, payload.Contact, payload.Id).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt)
 	if err != nil {
-		return model.EmployeeModel{}, fmt.Errorf("UpdateEmployee.Repository : %v", err)
+		return model.EmployeeModel{}, err
 	}
 
 	return employee, nil
@@ -52,7 +52,7 @@ func (e *EmployeeRepositoryImpl) UpdateEmployee(payload model.EmployeeModel) (mo
 func (e *EmployeeRepositoryImpl) DeleteEmployeeById(id string) error {
 	_, err := e.db.Exec(config.RawDeleteEmployeeById, id)
 	if err != nil {
-		return fmt.Errorf("DeleteEmployeeById.Repository : %v", err)
+		return err
 	}
 
 	return nil
@@ -64,7 +64,7 @@ func (e *EmployeeRepositoryImpl) GetEmployeeById(id string) (model.EmployeeModel
 	err := e.db.QueryRow(config.RawQueryGetEmployeeById, id).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
 
 	if err != nil {
-		return model.EmployeeModel{}, fmt.Errorf("GetEmployeeById.Repository : %v", err)
+		return model.EmployeeModel{}, err
 	}
 
 	return employee, nil
@@ -76,7 +76,7 @@ func (e *EmployeeRepositoryImpl) GetEmployeeByEmail(email string) (model.Employe
 	err := e.db.QueryRow(config.RawQueryGetEmployeeByEmail, email).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
 
 	if err != nil {
-		return model.EmployeeModel{}, fmt.Errorf("GetEmployeeByEmail.Repository : %v", err)
+		return model.EmployeeModel{}, err
 	}
 
 	return employee, nil
@@ -90,14 +90,14 @@ func (e *EmployeeRepositoryImpl) GetEmployees(page, size int) ([]model.EmployeeM
 
 	rows, err := e.db.Query(config.RawQueryGetEmployees, size, offset)
 	if err != nil {
-		return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Repository : %v", err)
+		return nil, shared_model.Paging{}, err
 	}
 
 	for rows.Next() {
 		var employee model.EmployeeModel
 
 		if err := rows.Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt); err != nil {
-			return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Repository : %v", err)
+			return nil, shared_model.Paging{}, err
 		}
 
 		employees = append(employees, employee)
@@ -106,7 +106,7 @@ func (e *EmployeeRepositoryImpl) GetEmployees(page, size int) ([]model.EmployeeM
 	totalRows := 0
 
 	if err = e.db.QueryRow(config.RAWQueryPaging).Scan(&totalRows); err != nil {
-		return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Repository : %v", err)
+		return nil, shared_model.Paging{}, err
 	}
 
 	paging = shared_model.Paging{
