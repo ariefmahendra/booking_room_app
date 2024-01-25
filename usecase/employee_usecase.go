@@ -18,6 +18,7 @@ type EmployeeUC interface {
 	GetEmployeeById(id string) (dto.EmployeeResponse, error)
 	GetEmployeeByEmail(email string) (dto.EmployeeResponse, error)
 	GetEmployees(page, size int) ([]dto.EmployeeResponse, shared_model.Paging, error)
+	GetDeletedEmployees(page, size int) ([]dto.EmployeeResponse, shared_model.Paging, error)
 }
 
 type EmployeeUCImpl struct {
@@ -26,6 +27,26 @@ type EmployeeUCImpl struct {
 
 func NewEmployeeUC(employeeRepo repository.EmployeeRepository) EmployeeUC {
 	return &EmployeeUCImpl{employeeRepo: employeeRepo}
+}
+
+func (e *EmployeeUCImpl) GetDeletedEmployees(page, size int) ([]dto.EmployeeResponse, shared_model.Paging, error) {
+	// default value for page and size
+	if page == 0 && size == 0 {
+		page, size = 1, 5
+	}
+
+	employees, paging, err := e.employeeRepo.GetDeletedEmployees(page, size)
+	if err != nil {
+		return nil, shared_model.Paging{}, err
+	}
+
+	var employeesDto []dto.EmployeeResponse
+	for _, employee := range employees {
+		employeeResponse := common.EmployeeModelToResponse(employee)
+		employeesDto = append(employeesDto, employeeResponse)
+	}
+
+	return employeesDto, paging, nil
 }
 
 func (e *EmployeeUCImpl) CreteEmployee(payload model.EmployeeModel) (dto.EmployeeResponse, error) {

@@ -29,6 +29,32 @@ func (e *EmployeeControllerImpl) Route() {
 	er.GET("/:id", e.GetEmployeeById)
 	er.GET("/email/:email", e.GetEmployeeByEmail)
 	er.GET("/", e.GetEmployees)
+	er.GET("/deleted", e.GetDeletedEmployees)
+}
+
+func (e *EmployeeControllerImpl) GetDeletedEmployees(ctx *gin.Context) {
+	claims := e.middleware.GetUser(ctx)
+	isOk := common.AuthorizationAdmin(claims)
+
+	if !isOk {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "forbidden")
+		return
+	}
+
+	pageParam := ctx.Query("page")
+	page, _ := strconv.Atoi(pageParam)
+
+	sizeParam := ctx.Query("size")
+	size, _ := strconv.Atoi(sizeParam)
+
+	employees, paging, err := e.employeeUC.GetDeletedEmployees(page, size)
+	if err != nil {
+		fmt.Printf("failed to get employees : %v", err)
+		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to get employees")
+		return
+	}
+
+	common.SendSuccessPagedResponse(ctx, http.StatusOK, employees, paging)
 }
 
 func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
