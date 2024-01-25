@@ -2,7 +2,7 @@ package controller
 
 import (
 	"booking-room/delivery/middleware"
-	"booking-room/model"
+	"booking-room/model/dto"
 	"booking-room/shared/common"
 	"booking-room/usecase"
 	"fmt"
@@ -33,7 +33,7 @@ func (r *RoomController) getHandler(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusNotFound, fmt.Sprintf("Room with ID %s not found", id))
 		return
 	}
-	common.SendSingleResponse(c, room, "Ok")
+	common.SendSuccessResponse(c, http.StatusOK, room)
 }
 
 func (r *RoomController) createHandler(c *gin.Context) {
@@ -42,10 +42,11 @@ func (r *RoomController) createHandler(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
 		return
 	}
-	var payload model.Room
+
+	var payload dto.RoomRequest
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		log.Println("Error binding JSON:", err.Error())
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		common.SendErrorResponse(c, http.StatusBadRequest, "Bad Request")
 		return
 	}
 
@@ -56,7 +57,7 @@ func (r *RoomController) createHandler(c *gin.Context) {
 		return
 	}
 
-	common.SendCreateResponse(c, room, "Created")
+	common.SendSuccessResponse(c, http.StatusOK, room)
 }
 
 func (r *RoomController) updateHandler(c *gin.Context) {
@@ -66,24 +67,20 @@ func (r *RoomController) updateHandler(c *gin.Context) {
 		return
 	}
 
-	var payload model.Room
+	var payload dto.RoomRequest
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		common.SendErrorResponse(c, http.StatusBadRequest, "Bad Request")
 		return
 	}
 
-	// room, err := r.roomUC.UpdateRoom(payload)
-	// if err != nil {
-	//  common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-	//  return
-	// }
-	// common.SendCreateResponse(c, room, "Updated")
+	room, err := r.roomUC.UpdateRoom(payload)
+	if err != nil {
+		log.Println("Error updating room:", err.Error())
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "success",
-		"data":    payload,
-	})
+	common.SendSuccessResponse(c, http.StatusOK, room)
 }
 
 func (r *RoomController) listHandler(c *gin.Context) {
@@ -113,7 +110,7 @@ func (r *RoomController) listHandler(c *gin.Context) {
 		"paging": paging,
 	}
 
-	common.SendListResponse(c, response, "Ok")
+	common.SendSuccessPagedResponse(c, http.StatusOK, response, paging)
 }
 
 func NewRoomController(roomUC usecase.RoomUseCase, rg *gin.RouterGroup) *RoomController {

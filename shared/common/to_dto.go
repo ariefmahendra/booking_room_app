@@ -31,3 +31,23 @@ func RequestToEmployeeModel(payload dto.EmployeeCreateRequest) model.EmployeeMod
 		Contact:  payload.Contact,
 	}
 }
+
+func RoomModelToResponse(room model.Room) dto.RoomResponse {
+	return dto.RoomResponse{
+		Id:         room.Id,
+		CodeRoom:   room.CodeRoom,
+		RoomType:   room.RoomType,
+		Facilities: room.Facilities,
+		Capacity:   room.Capacity,
+	}
+}
+
+func RequestToRoomModel(request dto.RoomRequest) model.Room {
+	return model.Room{
+		Id:         request.Id,
+		CodeRoom:   request.CodeRoom,
+		RoomType:   request.RoomType,
+		Facilities: request.Facilities,
+		Capacity:   request.Capacity,
+	}
+}
