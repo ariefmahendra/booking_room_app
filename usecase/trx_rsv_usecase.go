@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"booking-room/model"
 	"booking-room/model/dto"
 	"booking-room/repository"
 	"booking-room/shared/shared_model"
@@ -16,16 +17,27 @@ type TrxRsvUsecase interface {
 	DeleteResv(id string) (string, error)
 	GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
 	UpdateResv(payload dto.PayloadReservationDTO) (dto.TransactionDTO, error)
-	GetAvailableRoom(payload dto.PayloadAvailable) ([]string, error)
+	GetAvailableRoom(payload dto.PayloadAvailable)([]model.Room, error)
 }
 
 type trxRsvUsecase struct {
 	trxRsvRepo repository.TrxRsvRepository
+	roomUC RoomUseCase
 }
 
 // GetAvailableRoom implements TrxRsvUsecase.
-func (t *trxRsvUsecase) GetAvailableRoom(payload dto.PayloadAvailable) ([]string, error) {
-	return t.trxRsvRepo.GetAvailableRoom(payload)
+func (t *trxRsvUsecase) GetAvailableRoom(payload dto.PayloadAvailable) ([]model.Room, error) {
+	idr, _ := t.trxRsvRepo.GetAvailableRoom(payload)
+
+	var rooms []model.Room
+	for _, id := range idr {
+		room, err := t.roomUC.FindRoomById(id)
+		if err != nil {
+			return nil, err
+		}
+		rooms = append(rooms, room)
+	}
+	return  rooms, nil
 }
 
 // UpdateResv implements TrxRsvUsecase.
@@ -81,8 +93,9 @@ func (t *trxRsvUsecase) List(page, size int) ([]dto.TransactionDTO, shared_model
 	return t.trxRsvRepo.List(p, s)
 }
 
-func NewTrxRsvUseCase(trxRsvRepo repository.TrxRsvRepository) TrxRsvUsecase {
+func NewTrxRsvUseCase(trxRsvRepo repository.TrxRsvRepository, roomUC RoomUseCase) TrxRsvUsecase {
 	return &trxRsvUsecase{
+		roomUC     : roomUC,
 		trxRsvRepo: trxRsvRepo,
 	}
 }

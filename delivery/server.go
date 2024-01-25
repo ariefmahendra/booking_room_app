@@ -73,7 +73,7 @@ func NewServer() *Server {
 	faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
 	roomUC = usecase.NewRoomUseCase(roomRepository)	  
-	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo)
+	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo, roomUC)
 
 	employeeController := controller.NewEmployeeController(employeeUC)
 

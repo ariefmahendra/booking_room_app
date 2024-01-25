@@ -6,6 +6,8 @@ import (
 	"booking-room/model/dto"
 	"booking-room/shared/shared_model"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"log"
 	"math"
@@ -59,9 +61,46 @@ func (t *trxRsvRepository) GetAvailableRoom(payload dto.PayloadAvailable) ([]str
 		return nil, err
 	}
 
+	// Menghapus duplikat
+	uuidSet := make(map[string]struct{})
+	var uniqueUUIDs []string
+	for _, uuid := range roomIDs {
+		if _, exists := uuidSet[uuid]; !exists {
+			uniqueUUIDs = append(uniqueUUIDs, uuid)
+			uuidSet[uuid] = struct{}{}
+		}
+	}
+	// Menggabungkan UUID menjadi string
+	concatenatedIDs := "'" + strings.Join(uniqueUUIDs, "', '") + "'"
+	s := strings.Trim(concatenatedIDs, "'")
+	log.Println(concatenatedIDs)
+	log.Println(s)
 	
-
-	return roomIDs, nil
+	query = fmt.Sprintf("SELECT id FROM mst_room WHERE id NOT IN (%s)", concatenatedIDs)
+	var roomCodes []string
+	rows, err = t.db.Query(query)
+	if err != nil {
+		log.Println("trxRepository.Query", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+	
+	for rows.Next() {
+		var roomCode string
+		err = rows.Scan(&roomCode)
+		if err != nil {
+			log.Println("trxRepository.Scan", err.Error())
+			return nil, err
+		}
+		roomCodes = append(roomCodes, roomCode)
+	}
+	
+	if err := rows.Err(); err != nil {
+		log.Println("Error iterating over rows:", err)
+		return nil, err
+	}
+	
+	return roomCodes, nil
 }
 
 
