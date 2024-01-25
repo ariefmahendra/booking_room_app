@@ -1,5 +1,4 @@
 .env
 
-/config
-
+# Ignore file note.txt
 note.txt

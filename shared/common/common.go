@@ -8,13 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SendErrorResponse(ctx *gin.Context, code int, message string){
-	ctx.JSON(code, shared_model.Status{
-		Code: code,
-		Message: message,
-	})
-}
-
 func SendPagedResponse(ctx *gin.Context, data interface{}, paging shared_model.Paging, message string) {
 	ctx.JSON(http.StatusOK, shared_model.PagedResponse{
 		Status: shared_model.Status{
@@ -28,8 +21,6 @@ func SendPagedResponse(ctx *gin.Context, data interface{}, paging shared_model.P
 
 func SendSingleResponse(ctx *gin.Context, data interface{}, message string) {
     ctx.JSON(http.StatusOK, shared_model.SingleResponse{
-        Code:    http.StatusOK,
-        Message: message,
         Data:    data,
     })
 }
@@ -37,8 +28,16 @@ func SendSingleResponse(ctx *gin.Context, data interface{}, message string) {
 
 func SendCreatedResponse(ctx *gin.Context, data interface{}, message string){
 	ctx.JSON(http.StatusOK, shared_model.SingleResponse{
-		Code:    http.StatusCreated,
-        Message: message,
         Data:    data,
+	})
+}
+
+func SendCreateResponse(c *gin.Context, data interface{}, message string) {
+	c.JSON(http.StatusCreated, &shared_model.SingleResponse{
+		Status: shared_model.Status{
+			Code:    http.StatusCreated,
+			Message: message,
+		},
+		Data: data,
 	})
 }
