@@ -17,10 +17,102 @@ type TrxRsvRepository interface {
 	PostReservation(payload dto.PayloadReservationDTO) (string, error)
 	UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error)
 	DeleteResv(id string) (string, error)
+	GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
 }
 
 type trxRsvRepository struct {
 	db *sql.DB
+}
+
+// GetApprovalList implements TrxRsvRepository.
+func (t *trxRsvRepository) GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error) {
+	var trxList []dto.TransactionDTO
+	offset := (page - 1) * size
+
+	query :=
+		`SELECT 
+			tx.id, 
+			tx.employee_id, 
+			emp.name AS employee_name, 
+			room.code_room, 
+			tx.start_date, 
+			tx.end_date,
+			tx.notes,
+			tx.approval_status,
+			tx.approval_note,
+			tx.created_at,
+			tx.updated_at,
+			tx.deleted_at
+		FROM
+			tx_room_reservation tx
+		JOIN
+			mst_employee emp ON tx.employee_id = emp.id
+		JOIN
+			mst_room room ON tx.room_id = room.id
+		WHERE 
+			tx.approval_status = 'PENDING' AND tx.deleted_at IS NULL
+		ORDER BY 
+			tx.created_at ASC
+		LIMIT $1 OFFSET $2`
+
+	rows, err := t.db.Query(query, size, offset)
+	for rows.Next() {
+		var trx dto.TransactionDTO
+		err = rows.Scan(
+			&trx.Id,
+			&trx.EmployeeId,
+			&trx.EmplyName,
+			&trx.RoomCode,
+			&trx.StartDate,
+			&trx.EndDate,
+			&trx.Note,
+			&trx.ApproveStatus,
+			&trx.ApproveNote,
+			&trx.CreateAt,
+			&trx.UpdateAt,
+			&trx.DeleteAt,
+		)
+		if err != nil {
+			log.Println("trxRepository.Scan", err.Error())
+			return nil, shared_model.Paging{}, err
+		}
+
+		queryFacility := `
+		SELECT a.id, f.code_name, f.facilities_type
+		from tx_additional a
+		JOIN mst_facilities f ON a.facilities_id = f.id
+		WHERE a.reservation_id = $1
+		`
+		fclty, err := t.db.Query(queryFacility, trx.Id)
+		if err != nil {
+			return nil, shared_model.Paging{}, err
+		}
+		for fclty.Next() {
+			var f dto.Facility
+			err = fclty.Scan(&f.Id, &f.Code, &f.Type)
+			if err != nil {
+				return nil, shared_model.Paging{}, err
+			}
+			trx.Facility = append(trx.Facility, f)
+		}
+
+		trxList = append(trxList, trx)
+	}
+
+	totalRows := 0
+	if err := t.db.QueryRow("SELECT COUNT(*) FROM tx_room_reservation").Scan(&totalRows); err != nil {
+		return nil, shared_model.Paging{}, err
+	}
+
+	paging := shared_model.Paging{
+		Page:        page,
+		RowsPerPage: page,
+		TotalRows:   page,
+		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
+	}
+
+	return trxList, paging, err
+
 }
 
 // DeleteResv implements TrxRsvRepository.

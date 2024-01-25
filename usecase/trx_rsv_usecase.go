@@ -14,10 +14,17 @@ type TrxRsvUsecase interface {
 	PostReservation(payload dto.PayloadReservationDTO) (dto.TransactionDTO, error)
 	UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error)
 	DeleteResv(id string) (string, error)
+	GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
 }
 
 type trxRsvUsecase struct {
 	trxRsvRepo repository.TrxRsvRepository
+}
+
+// GetApprovalList implements TrxRsvUsecase.
+func (t *trxRsvUsecase) GetApprovalList(page int, size int) ([]dto.TransactionDTO, shared_model.Paging, error) {
+	p, s := noneQuery(page, size)
+	return t.trxRsvRepo.GetApprovalList(p, s)
 }
 
 // DeleteResv implements TrxRsvUsecase.
@@ -32,9 +39,7 @@ func (t *trxRsvUsecase) UpdateStatus(payload dto.TransactionDTO) (dto.Transactio
 	if payload.ApproveNote == "" {
 		payload.ApproveNote = "Viewed by GA"
 	}
-
 	return t.trxRsvRepo.UpdateStatus(payload)
-
 }
 
 // PostReservation implements TrxRsvUsecase.

@@ -26,6 +26,7 @@ func (t *TrxRsvController) Route() {
 	t.rg.GET("/",t.getAll )
 	t.rg.GET("/get/:id",t.getID)
 	t.rg.GET("/employee/:id",t.getEmployee)
+	t.rg.GET("/approval/",t.getApprove)
 	t.rg.POST("/", t.createRSVP)
 	t.rg.PUT("/", t.acceptRSVP)
 	t.rg.DELETE("/:id", t.deleteRSVP)
@@ -54,7 +55,7 @@ func (t *TrxRsvController) getID(c *gin.Context)  {
 		common.SendErrorResponse(c, http.StatusBadRequest, "Transcaction with ID : " + id + " not found")
 		return
 	}
-	common.SendSingleResponse(c, trx, "success")
+	common.SendSuccessResponse(c, http.StatusOK,trx)
 }
 
 func (t *TrxRsvController) getEmployee(c *gin.Context)  {
@@ -120,5 +121,20 @@ func (t *TrxRsvController) deleteRSVP(c *gin.Context)  {
 		return
 	}
 	common.SendSingleResponse(c, del, "success")
+}
+
+func (t *TrxRsvController) getApprove(c *gin.Context)  {
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	list, paging, err := t.trxRsvpUC.GetApprovalList(page,size)
+	if err != nil{
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	var response []interface{}
+	for _, v := range list{
+		response = append(response, v)
+	}
+	common.SendPagedResponse(c, response, paging, "success")
 }
 
