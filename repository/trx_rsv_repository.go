@@ -6,6 +6,7 @@ import (
 	"booking-room/model/dto"
 	"booking-room/shared/shared_model"
 	"database/sql"
+
 	"log"
 	"math"
 )
@@ -19,11 +20,50 @@ type TrxRsvRepository interface {
 	DeleteResv(id string) (string, error)
 	GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
 	UpdateResv(payload dto.PayloadReservationDTO) (string, error)
+	GetAvailableRoom(payload dto.PayloadAvailable) ([]string, error)
 }
 
 type trxRsvRepository struct {
 	db *sql.DB
 }
+
+// GetAvaibleRoom implements TrxRsvRepository.
+func (t *trxRsvRepository) GetAvailableRoom(payload dto.PayloadAvailable) ([]string, error) {
+	var roomIDs []string
+
+	query := `
+		SELECT room_id
+		FROM tx_room_reservation
+		WHERE start_date >= $1
+			AND end_date <= $2
+			AND approval_status IN ('PENDING', 'ACCEPT');
+	`
+	rows, err := t.db.Query(query, payload.StartDate, payload.EndDate)
+	if err != nil {
+		log.Println("trxRsvRepository.Query", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var roomID string
+		if err := rows.Scan(&roomID); err != nil {
+			log.Println("trxRsvRepository.Scan", err.Error())
+			return nil, err
+		}
+		roomIDs = append(roomIDs, roomID)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Error iterating over rows:", err)
+		return nil, err
+	}
+
+	
+
+	return roomIDs, nil
+}
+
 
 // UpdateResv implements TrxRsvRepository.
 func (t *trxRsvRepository) UpdateResv(payload dto.PayloadReservationDTO) (string, error) {
@@ -33,7 +73,7 @@ func (t *trxRsvRepository) UpdateResv(payload dto.PayloadReservationDTO) (string
 	query := "SELECT id FROM mst_room WHERE code_room = $1"
 	err := t.db.QueryRow(query, payload.RoomCode).Scan(&room_id)
 	if err != nil {
-		log.Println("taskRepository.Query", err.Error())
+		log.Println("trxRsvRepository.Query", err.Error())
 		return "", err
 	}
 

@@ -16,10 +16,21 @@ type TrxRsvUsecase interface {
 	DeleteResv(id string) (string, error)
 	GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
 	UpdateResv(payload dto.PayloadReservationDTO) (dto.TransactionDTO, error)
+	GetAvailableRoom(payload dto.PayloadAvailable) ([]string, error)
 }
 
 type trxRsvUsecase struct {
 	trxRsvRepo repository.TrxRsvRepository
+}
+
+// GetAvailableRoom implements TrxRsvUsecase.
+func (t *trxRsvUsecase) GetAvailableRoom(payload dto.PayloadAvailable) ([]string, error) {
+	return t.trxRsvRepo.GetAvailableRoom(payload)
+}
+
+// UpdateResv implements TrxRsvUsecase.
+func (*trxRsvUsecase) UpdateResv(payload dto.PayloadReservationDTO) (dto.TransactionDTO, error) {
+	panic("unimplemented")
 }
 
 // GetApprovalList implements TrxRsvUsecase.

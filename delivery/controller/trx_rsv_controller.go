@@ -29,8 +29,9 @@ func (t *TrxRsvController) Route() {
 	t.rg.GET("/approval",t.getApprove)
 	t.rg.PUT("/approval", t.acceptRSVP)
 	t.rg.POST("/", t.createRSVP)
-	t.rg.PUT("/:id", t.editRSVP)
+	// t.rg.PUT("/:id", t.editRSVP)
 	t.rg.DELETE("/:id", t.deleteRSVP)
+	t.rg.GET("/avaible",t.getAvaible)
 }
 
 func (t *TrxRsvController) getAll(c *gin.Context)  {
@@ -150,7 +151,7 @@ func (t *TrxRsvController) editRSVP(c *gin.Context)  {
 	
 	var payload dto.PayloadReservationDTO
 	payload.Id = trx.Id
-	
+
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -171,4 +172,19 @@ func (t *TrxRsvController) editRSVP(c *gin.Context)  {
 	// common.SendCreatedResponse(c, trx, "updated")
 
 	common.SendSuccessResponse(c, http.StatusOK, payload)
+}
+
+func (t *TrxRsvController) getAvaible(c *gin.Context)  {
+	var avble dto.PayloadAvailable
+	if err := c.ShouldBindJSON(&avble); err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if avble.StartDate == "" && avble.EndDate == "" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "required time range")
+		return
+	}
+	
+	response, _ :=t.trxRsvpUC.GetAvailableRoom(avble)
+	common.SendSuccessResponse(c, http.StatusOK, response)
 }

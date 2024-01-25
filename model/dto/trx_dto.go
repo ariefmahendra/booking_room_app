@@ -33,3 +33,9 @@ type PayloadReservationDTO struct {
 	Note 		string `json:"note"`
 	Facilities 	[]Facility `json:"facilities"`
 }
+
+type PayloadAvailable struct{
+	IdRoom string `json:"id_room"`
+	StartDate string `json:"start_date"`
+	EndDate string `json:"end_date"`
+}
