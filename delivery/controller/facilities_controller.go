@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"booking-room/delivery/middleware"
 	"booking-room/model"
 	"booking-room/shared/common"
 	"booking-room/usecase"
@@ -13,6 +14,7 @@ import (
 
 type FacilitiesController struct {
 	facilitiesUsecase usecase.FacilitiesUsecase
+	middleware        *middleware.Middleware
 	fg                *gin.RouterGroup
 }
 
@@ -99,6 +101,13 @@ func (f *FacilitiesController) FindFacilityByType(c *gin.Context) {
 
 // CreateFacility Create new facility
 func (f *FacilitiesController) CreateFacility(c *gin.Context) {
+	claims := f.middleware.GetUser(c)
+	isOk := common.AuthorizationAdmin(claims)
+	if !isOk {
+		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
+		return
+	}
+
 	var payload model.Facilities
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
@@ -114,6 +123,13 @@ func (f *FacilitiesController) CreateFacility(c *gin.Context) {
 
 // UpdateFacility Update facility
 func (f *FacilitiesController) UpdateFacility(c *gin.Context) {
+	claims := f.middleware.GetUser(c)
+	isOk := common.AuthorizationAdmin(claims)
+	if !isOk {
+		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
+		return
+	}
+
 	id := c.Param("id")
 	var payload model.Facilities
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -130,6 +146,13 @@ func (f *FacilitiesController) UpdateFacility(c *gin.Context) {
 
 // DeleteFacility Delete facility by id
 func (f *FacilitiesController) DeleteFacility(c *gin.Context) {
+	claims := f.middleware.GetUser(c)
+	isOk := common.AuthorizationAdmin(claims)
+	if !isOk {
+		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
+		return
+	}
+
 	id := c.Param("id")
 	err := f.facilitiesUsecase.Delete(id)
 	if err != nil {
@@ -152,6 +175,13 @@ func (f *FacilitiesController) DeleteFacilityByName(c *gin.Context) {
 
 // FindAllDeletedFacilities Get deleted facilities
 func (f *FacilitiesController) FindAllDeletedFacilities(c *gin.Context) {
+	claims := f.middleware.GetUser(c)
+	isOk := common.AuthorizationAdmin(claims)
+	if !isOk {
+		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
+		return
+	}
+
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
 	if page <= 0 {
@@ -168,9 +198,10 @@ func (f *FacilitiesController) FindAllDeletedFacilities(c *gin.Context) {
 }
 
 // NewFacilitiesController constructor for facilities controller
-func NewFacilitiesController(facilitiesUsecase usecase.FacilitiesUsecase, fg *gin.RouterGroup) *FacilitiesController {
+func NewFacilitiesController(facilitiesUsecase usecase.FacilitiesUsecase, middleware *middleware.Middleware, fg *gin.RouterGroup) *FacilitiesController {
 	return &FacilitiesController{
 		facilitiesUsecase: facilitiesUsecase,
+		middleware:        middleware,
 		fg:                fg,
 	}
 }

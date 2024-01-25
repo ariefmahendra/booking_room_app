@@ -31,7 +31,7 @@ func (s *Server) InitRoute() {
 
 	// route for management employee
 	er := s.engine.Group("/api/v1/employees")
-	controller.NewEmployeeController(s.employeeUC, er).Route()
+	controller.NewEmployeeController(s.employeeUC, s.middleware, er).Route()
 
 	// route for management room
 	rg := s.engine.Group("/api/v1/room")
@@ -39,7 +39,7 @@ func (s *Server) InitRoute() {
 
 	// route for management facilities
 	fg := s.engine.Group("/api/v1/facilities")
-	controller.NewFacilitiesController(s.facilitiesUC, fg).Route()
+	controller.NewFacilitiesController(s.facilitiesUC, s.middleware, fg).Route()
 
 	// route for management transaction
 	rs := s.engine.Group("/api/v1/reservation")

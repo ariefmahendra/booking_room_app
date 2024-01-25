@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 type EmployeeControllerImpl struct {
@@ -18,8 +17,8 @@ type EmployeeControllerImpl struct {
 	rg         *gin.RouterGroup
 }
 
-func NewEmployeeController(employeeUC usecase.EmployeeUC, rg *gin.RouterGroup) *EmployeeControllerImpl {
-	return &EmployeeControllerImpl{employeeUC: employeeUC, rg: rg}
+func NewEmployeeController(employeeUC usecase.EmployeeUC, middleware *middleware.Middleware, rg *gin.RouterGroup) *EmployeeControllerImpl {
+	return &EmployeeControllerImpl{employeeUC: employeeUC, middleware: middleware, rg: rg}
 }
 
 func (e *EmployeeControllerImpl) Route() {
@@ -30,18 +29,12 @@ func (e *EmployeeControllerImpl) Route() {
 	er.GET("/:id", e.GetEmployeeById)
 	er.GET("/email/:email", e.GetEmployeeByEmail)
 	er.GET("/", e.GetEmployees)
-
 }
 
 func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
-
-	if claims == nil {
-		return
-	}
-
-	if strings.ToUpper(claims.Role) != "ADMIN" {
-		common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "Forbidden")
 		return
 	}
 
@@ -72,13 +65,8 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 
 func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
-
-	if claims == nil {
-		return
-	}
-
-	if strings.ToUpper(claims.Role) != "ADMIN" {
-		common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "Forbidden")
 		return
 	}
 
@@ -107,13 +95,8 @@ func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 
 func (e *EmployeeControllerImpl) DeleteEmployee(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
-
-	if claims == nil {
-		return
-	}
-
-	if strings.ToUpper(claims.Role) != "ADMIN" {
-		common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "Forbidden")
 		return
 	}
 
@@ -131,7 +114,6 @@ func (e *EmployeeControllerImpl) DeleteEmployee(ctx *gin.Context) {
 
 func (e *EmployeeControllerImpl) GetEmployeeById(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
-
 	if claims == nil {
 		return
 	}
@@ -169,13 +151,10 @@ func (e *EmployeeControllerImpl) GetEmployeeByEmail(ctx *gin.Context) {
 
 func (e *EmployeeControllerImpl) GetEmployees(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
+	isOk := common.AuthorizationAdmin(claims)
 
-	if claims == nil {
-		return
-	}
-
-	if strings.ToUpper(claims.Role) != "ADMIN" {
-		common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+	if !isOk {
+		common.SendErrorResponse(ctx, http.StatusForbidden, "forbidden")
 		return
 	}
 

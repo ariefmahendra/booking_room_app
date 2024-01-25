@@ -25,6 +25,7 @@ func (m *Middleware) NewAuth(ctx *gin.Context) {
 
 		if fullToken == "" {
 			common.SendErrorResponse(ctx, http.StatusUnauthorized, "unauthorized")
+			ctx.Abort()
 			return
 		}
 
@@ -32,23 +33,27 @@ func (m *Middleware) NewAuth(ctx *gin.Context) {
 
 		if len(tokens) != 2 {
 			common.SendErrorResponse(ctx, http.StatusUnauthorized, "token length invalid")
+			ctx.Abort()
 			return
 		}
 
 		if tokens[0] != "Bearer" {
 			common.SendErrorResponse(ctx, http.StatusUnauthorized, "bearer token invalid")
+			ctx.Abort()
 			return
 		}
 
 		customClaims, err := m.jwtService.ValidateToken(tokens[1])
 		if err != nil {
 			common.SendErrorResponse(ctx, http.StatusUnauthorized, "token invalid")
+			ctx.Abort()
 			return
 		}
 
 		role := strings.ToUpper(customClaims.Role)
 		if (customClaims == nil) || (role != "ADMIN" && role != "EMPLOYEE" && role != "GA") {
 			common.SendErrorResponse(ctx, http.StatusForbidden, "role forbidden")
+			ctx.Abort()
 			return
 		}
 

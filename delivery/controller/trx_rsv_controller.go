@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"booking-room/delivery/middleware"
 	"booking-room/model/dto"
 	"booking-room/shared/common"
 	"booking-room/usecase"
@@ -11,8 +12,9 @@ import (
 )
 
 type TrxRsvController struct {
-	trxRsvpUC usecase.TrxRsvUsecase
-	rg        *gin.RouterGroup
+	trxRsvpUC  usecase.TrxRsvUsecase
+	middleware *middleware.Middleware
+	rg         *gin.RouterGroup
 }
 
 func NewTrxRsvpController(trxRsvpUC usecase.TrxRsvUsecase, rg *gin.RouterGroup) *TrxRsvController {
@@ -32,6 +34,12 @@ func (t *TrxRsvController) Route() {
 }
 
 func (t *TrxRsvController) getAll(c *gin.Context) {
+	claims := t.middleware.GetUser(c)
+	if ok := common.AuthorizationGaAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
+
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
 	list, paging, err := t.trxRsvpUC.List(page, size)
@@ -58,6 +66,12 @@ func (t *TrxRsvController) getID(c *gin.Context) {
 }
 
 func (t *TrxRsvController) getEmployee(c *gin.Context) {
+	claims := t.middleware.GetUser(c)
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
+
 	id := c.Param("id")
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
@@ -92,6 +106,12 @@ func (t *TrxRsvController) createRSVP(c *gin.Context) {
 }
 
 func (t *TrxRsvController) acceptRSVP(c *gin.Context) {
+	claims := t.middleware.GetUser(c)
+	if ok := common.AuthorizationGaAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
+
 	// id := c.Param("id")
 	var acc dto.TransactionDTO
 	if err := c.ShouldBindJSON(&acc); err != nil {
@@ -112,6 +132,7 @@ func (t *TrxRsvController) acceptRSVP(c *gin.Context) {
 }
 
 func (t *TrxRsvController) deleteRSVP(c *gin.Context) {
+
 	id := c.Param("id")
 
 	del, err := t.trxRsvpUC.DeleteResv(id)
