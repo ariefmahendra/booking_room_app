@@ -111,7 +111,7 @@ func (e *EmployeeRepositoryImpl) GetEmployees(page, size int) ([]model.EmployeeM
 
 	paging = shared_model.Paging{
 		Page:       page,
-		RowPerPage: size,
+		RowsPerPage: size,
 		TotalRows:  totalRows,
 		TotalPages: int(math.Ceil(float64(totalRows) / float64(size))),
 	}

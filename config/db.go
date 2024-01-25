@@ -29,7 +29,4 @@ func ConnectDB() *sql.DB {
 
 	return db
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> ed7e6ada7c231957f8498b03fd926752a5f88f1d

@@ -27,14 +27,14 @@ func SendSingleResponse(c *gin.Context, data interface{}, message string) {
 	})
 }
 
-func SendErrorResponse(c *gin.Context, code int, message string) {
+/*func SendErrorResponse(c *gin.Context, code int, message string) {
 	c.AbortWithStatusJSON(code, &shared_model.Status{
 		Code:    code,
 		Message: message,
 	})
-}
+}*/
 
-func SendNoContentResponse(c *gin.Context) {
+/*func SendNoContentResponse(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
@@ -46,4 +46,4 @@ func SendListResponse(c *gin.Context, data interface{}, message string) {
 		},
 		Data: data,
 	})
-}
+}*/
