@@ -8,7 +8,7 @@ type Paging struct {
 }
 
 type ListResponse struct {
-	Status Status `json:"status"`
+	Status Status      `json:"status"`
 	Data   interface{} `json:"data"`
-	Paging Paging `json:"paging"`
+	Paging Paging      `json:"paging"`
 }

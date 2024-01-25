@@ -1,4 +1,5 @@
 .env
+.idea/
 
 # Ignore file note.txt
 note.txt

@@ -50,14 +50,14 @@ func (s *Server) InitRoute(){
 
 func (s *Server) Run() {
 	s.InitRoute()
-	if err := s.engine.Run(":8080"); err != nil {
-		panic(fmt.Errorf("Failed to start server: %v", err))
+	if err := s.engine.Run(s.host); err != nil {
+		panic(fmt.Errorf("failed to start server: %v", err))
 	}
 }
 
-func NewServer() *Server{
+func NewServer() *Server {
 	cfg, err := config.NewConfig()
-	if err !=nil{
+	if err != nil {
 		panic(fmt.Errorf("config error : %v", err))
 	}
 	db := config.ConnectDB()
