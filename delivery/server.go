@@ -13,16 +13,15 @@ import (
 type Server struct {
 	employeeController *controller.EmployeeControllerImpl
 	facilitiesUC       usecase.FacilitiesUsecase
+	trxRsvpUC          usecase.TrxRsvUsecase
 	engine             *gin.Engine
 	host               string
 }
 
 func (s *Server) InitRoute() {
-	s.engine.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	rsvp := s.engine.Group("/rsvp")
+	controller.NewTrxRsvpController(s.trxRsvpUC, rsvp).Route()
+
 	// route for management employee
 	er := s.engine.Group("/api/v1/employees")
 	er.POST("/", s.employeeController.CreateEmployee)
@@ -53,12 +52,17 @@ func NewServer() *Server {
 	if err != nil {
 		panic(fmt.Errorf("config error : %v", err))
 	}
+
 	db := config.ConnectDB()
 
 	employeeRepository := repository.NewEmployeeRepository(db)
 	facilitiesRepository := repository.NewFacilitiesRepository(db)
+	trxRsvpRepo := repository.NewTrxRsvRepository(db)
+
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
-	faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
+	facilitiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
+	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo)
+
 	employeeController := controller.NewEmployeeController(employeeUC)
 
 	engine := gin.Default()
@@ -66,7 +70,8 @@ func NewServer() *Server {
 
 	return &Server{
 		employeeController: employeeController,
-		facilitiesUC:       faciltiiesUC,
+		facilitiesUC:       facilitiesUC,
+		trxRsvpUC:          trxRsvpUC,
 		engine:             engine,
 		host:               host,
 	}

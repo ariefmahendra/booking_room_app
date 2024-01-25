@@ -1,0 +1,5 @@
+Transaction API
+X - create transaction - admin, GA
+V - get transactions - admin, GA
+V - get transaction by id - admin, GA, employee
+V - get transaction by employee id - admin, GA, employee
