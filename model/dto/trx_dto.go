@@ -13,9 +13,9 @@ type TransactionDTO struct {
 	ApproveStatus string `json:"approval_status"`
 	ApproveNote string `json:"apprv_note"`
 	Facility []Facility `json:"facilities"`
-	CreateAt time.Time `json:"create_at"`
-	UpdateAt time.Time `json:"update_at"`
-	DeleteAt *time.Time `json:"delete_at"`
+	CreateAt time.Time `json:"-"`
+	UpdateAt time.Time `json:"-"`
+	DeleteAt *time.Time `json:"-"`
 }
 
 type Facility struct{

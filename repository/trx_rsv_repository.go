@@ -100,7 +100,7 @@ func (t *trxRsvRepository) GetApprovalList(page, size int) ([]dto.TransactionDTO
 	}
 
 	totalRows := 0
-	if err := t.db.QueryRow("SELECT COUNT(*) FROM tx_room_reservation").Scan(&totalRows); err != nil {
+	if err := t.db.QueryRow("SELECT COUNT(*) FROM tx_room_reservation WHERE approval_status = 'PENDING' AND deleted_at IS NULL").Scan(&totalRows); err != nil {
 		return nil, shared_model.Paging{}, err
 	}
 

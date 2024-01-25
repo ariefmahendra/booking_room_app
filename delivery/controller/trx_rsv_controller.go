@@ -26,8 +26,8 @@ func (t *TrxRsvController) Route() {
 	t.rg.GET("/",t.getAll )
 	t.rg.GET("/get/:id",t.getID)
 	t.rg.GET("/employee/:id",t.getEmployee)
-	t.rg.GET("/approval/",t.getApprove)
-	t.rg.POST("/", t.createRSVP)
+	t.rg.GET("/approval",t.getApprove)
+	t.rg.POST("approval", t.createRSVP)
 	t.rg.PUT("/", t.acceptRSVP)
 	t.rg.DELETE("/:id", t.deleteRSVP)
 }
@@ -89,7 +89,7 @@ func (t *TrxRsvController) createRSVP(c *gin.Context)  {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	common.SendCreatedResponse(c, trx, "created")
+	common.SendSuccessResponse(c, http.StatusCreated, trx)
 }
 
 func (t *TrxRsvController) acceptRSVP(c *gin.Context)  {
