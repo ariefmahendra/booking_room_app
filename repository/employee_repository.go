@@ -80,7 +80,7 @@ func (e *EmployeeRepositoryImpl) UpdateEmployee(payload model.EmployeeModel) (mo
 
 	err := e.db.QueryRow(config.UpdateEmployeeById, payload.Name, payload.Email, payload.Password, payload.Division, payload.Position, payload.Role, payload.Contact, payload.Id).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt)
 	if err != nil {
-		return model.EmployeeModel{}, err
+		return model.EmployeeModel{}, fmt.Errorf("UpdateEmployee.Repository : %v", err)
 	}
 
 	return employee, nil
@@ -101,7 +101,7 @@ func (e *EmployeeRepositoryImpl) GetEmployeeById(id string) (model.EmployeeModel
 	err := e.db.QueryRow(config.GetEmployeeById, id).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
 
 	if err != nil {
-		return model.EmployeeModel{}, err
+		return model.EmployeeModel{}, fmt.Errorf("GetEmployeeById.Repository : %v", err)
 	}
 
 	return employee, nil
@@ -113,7 +113,7 @@ func (e *EmployeeRepositoryImpl) GetEmployeeByEmail(email string) (model.Employe
 	err := e.db.QueryRow(config.GetEmployeeByEmail, email).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Password, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
 
 	if err != nil {
-		return model.EmployeeModel{}, err
+		return model.EmployeeModel{}, fmt.Errorf("GetEmployeeByEmail.Repository : %v", err)
 	}
 
 	return employee, nil
@@ -127,14 +127,14 @@ func (e *EmployeeRepositoryImpl) GetEmployees(page, size int) ([]model.EmployeeM
 
 	rows, err := e.db.Query(config.GetEmployees, size, offset)
 	if err != nil {
-		return nil, shared_model.Paging{}, err
+		return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Repository : %v", err)
 	}
 
 	for rows.Next() {
 		var employee model.EmployeeModel
 
 		if err := rows.Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt); err != nil {
-			return nil, shared_model.Paging{}, err
+			return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Repository : %v", err)
 		}
 
 		employees = append(employees, employee)
@@ -143,7 +143,7 @@ func (e *EmployeeRepositoryImpl) GetEmployees(page, size int) ([]model.EmployeeM
 	totalRows := 0
 
 	if err = e.db.QueryRow(config.PagingEmployee).Scan(&totalRows); err != nil {
-		return nil, shared_model.Paging{}, err
+		return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Repository : %v", err)
 	}
 
 	paging = shared_model.Paging{

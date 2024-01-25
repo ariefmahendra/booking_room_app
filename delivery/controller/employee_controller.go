@@ -7,6 +7,7 @@ import (
 	"booking-room/usecase"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -37,6 +38,7 @@ func (e *EmployeeControllerImpl) GetDeletedEmployees(ctx *gin.Context) {
 	isOk := common.AuthorizationAdmin(claims)
 
 	if !isOk {
+		log.Printf("authorization failed : %v", claims)
 		common.SendErrorResponse(ctx, http.StatusForbidden, "forbidden")
 		return
 	}
@@ -49,7 +51,7 @@ func (e *EmployeeControllerImpl) GetDeletedEmployees(ctx *gin.Context) {
 
 	employees, paging, err := e.employeeUC.GetDeletedEmployees(page, size)
 	if err != nil {
-		fmt.Printf("failed to get employees : %v", err)
+		log.Printf("failed to get deleted employees : %v\n", err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to get employees")
 		return
 	}
@@ -68,6 +70,7 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 
 	err := ctx.Bind(&employeeReq)
 	if err != nil {
+		log.Printf("failed to bind json create employee: %v", err)
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid request")
 		return
 	}
@@ -75,13 +78,14 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 	employee := common.RequestToEmployeeModel(employeeReq)
 
 	if ok := common.ValidateEmail(employee.Email); ok == false {
+		log.Printf("invalid email : %v", employee.Email)
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email")
 		return
 	}
 
 	employeeDto, err := e.employeeUC.CreteEmployee(employee)
 	if err != nil {
-		fmt.Printf("failed to create employee : %v", err)
+		log.Printf("failed to create employee : %v", err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to create employee")
 		return
 	}
@@ -92,6 +96,7 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
 	if ok := common.AuthorizationAdmin(claims); ok == false {
+		log.Printf("authorization failed : %v", claims)
 		common.SendErrorResponse(ctx, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -100,6 +105,7 @@ func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 
 	err := ctx.Bind(&employeeReq)
 	if err != nil {
+		log.Printf("failed to bind json update employee: %v", err)
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid request")
 		return
 	}
@@ -111,7 +117,7 @@ func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 
 	employeeDto, err := e.employeeUC.UpdateEmployee(employee)
 	if err != nil {
-		fmt.Printf("failed to update employee : %v", err)
+		log.Printf("failed to update employee : %v", err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to updating employee")
 		return
 	}
@@ -122,6 +128,7 @@ func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 func (e *EmployeeControllerImpl) DeleteEmployee(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
 	if ok := common.AuthorizationAdmin(claims); ok == false {
+		log.Printf("authorization failed : %v", claims)
 		common.SendErrorResponse(ctx, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -130,7 +137,7 @@ func (e *EmployeeControllerImpl) DeleteEmployee(ctx *gin.Context) {
 
 	err := e.employeeUC.DeleteEmployeeById(employeeId)
 	if err != nil {
-		fmt.Printf("failed to delete employee : %v", err)
+		log.Printf("failed to delete employee : %v", err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to delete employee")
 		return
 	}
@@ -148,7 +155,7 @@ func (e *EmployeeControllerImpl) GetEmployeeById(ctx *gin.Context) {
 
 	employeeById, err := e.employeeUC.GetEmployeeById(employeeId)
 	if err != nil {
-		fmt.Printf("failed to get employee by id: %v", err)
+		fmt.Printf("failed to get employee by id : %v", err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to get employee")
 		return
 	}
@@ -157,12 +164,6 @@ func (e *EmployeeControllerImpl) GetEmployeeById(ctx *gin.Context) {
 }
 
 func (e *EmployeeControllerImpl) GetEmployeeByEmail(ctx *gin.Context) {
-	claims := e.middleware.GetUser(ctx)
-
-	if claims == nil {
-		return
-	}
-
 	employeeEmail := ctx.Param("email")
 
 	employeeByEmail, err := e.employeeUC.GetEmployeeByEmail(employeeEmail)
@@ -180,6 +181,7 @@ func (e *EmployeeControllerImpl) GetEmployees(ctx *gin.Context) {
 	isOk := common.AuthorizationAdmin(claims)
 
 	if !isOk {
+		log.Printf("authorization failed : %v", claims)
 		common.SendErrorResponse(ctx, http.StatusForbidden, "forbidden")
 		return
 	}
@@ -192,7 +194,7 @@ func (e *EmployeeControllerImpl) GetEmployees(ctx *gin.Context) {
 
 	employees, paging, err := e.employeeUC.GetEmployees(page, size)
 	if err != nil {
-		fmt.Printf("failed to get employees : %v", err)
+		log.Printf("failed to get employees : %v\n", err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to get employees")
 		return
 	}

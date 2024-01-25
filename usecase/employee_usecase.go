@@ -6,7 +6,6 @@ import (
 	"booking-room/repository"
 	"booking-room/shared/common"
 	"booking-room/shared/shared_model"
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
@@ -58,7 +57,6 @@ func (e *EmployeeUCImpl) CreteEmployee(payload model.EmployeeModel) (dto.Employe
 
 	employee, err := e.employeeRepo.InsertEmployee(payload)
 	if err != nil {
-		fmt.Printf("ereateEmployee.Usecase : %v", err)
 		return dto.EmployeeResponse{}, err
 	}
 
@@ -68,11 +66,17 @@ func (e *EmployeeUCImpl) CreteEmployee(payload model.EmployeeModel) (dto.Employe
 }
 
 func (e *EmployeeUCImpl) UpdateEmployee(payload model.EmployeeModel) (dto.EmployeeResponse, error) {
+
+	_, err := e.employeeRepo.GetEmployeeById(payload.Id)
+	if err != nil {
+		return dto.EmployeeResponse{}, err
+	}
+
 	payload.Role = strings.ToUpper(payload.Role)
 
 	employee, err := e.employeeRepo.UpdateEmployee(payload)
 	if err != nil {
-		return dto.EmployeeResponse{}, fmt.Errorf("UpdateEmployee.Usecase : %v", err)
+		return dto.EmployeeResponse{}, err
 	}
 
 	employeeDto := common.EmployeeModelToResponse(employee)
@@ -83,7 +87,7 @@ func (e *EmployeeUCImpl) UpdateEmployee(payload model.EmployeeModel) (dto.Employ
 func (e *EmployeeUCImpl) DeleteEmployeeById(id string) error {
 	err := e.employeeRepo.DeleteEmployeeById(id)
 	if err != nil {
-		return fmt.Errorf("DeleteEmployeeById.Usecase : %v", err)
+		return err
 	}
 
 	return nil
@@ -92,7 +96,7 @@ func (e *EmployeeUCImpl) DeleteEmployeeById(id string) error {
 func (e *EmployeeUCImpl) GetEmployeeById(id string) (dto.EmployeeResponse, error) {
 	employee, err := e.employeeRepo.GetEmployeeById(id)
 	if err != nil {
-		return dto.EmployeeResponse{}, fmt.Errorf("GetEmployeeById.Usecase : %v", err)
+		return dto.EmployeeResponse{}, err
 	}
 
 	employeeDto := common.EmployeeModelToResponse(employee)
@@ -103,7 +107,7 @@ func (e *EmployeeUCImpl) GetEmployeeById(id string) (dto.EmployeeResponse, error
 func (e *EmployeeUCImpl) GetEmployeeByEmail(email string) (dto.EmployeeResponse, error) {
 	employee, err := e.employeeRepo.GetEmployeeByEmail(email)
 	if err != nil {
-		return dto.EmployeeResponse{}, fmt.Errorf("GetEmployeeByEmail.Usecase : %v", err)
+		return dto.EmployeeResponse{}, err
 	}
 
 	employeeDto := common.EmployeeModelToResponse(employee)
@@ -119,7 +123,7 @@ func (e *EmployeeUCImpl) GetEmployees(page, size int) ([]dto.EmployeeResponse, s
 
 	employees, paging, err := e.employeeRepo.GetEmployees(page, size)
 	if err != nil {
-		return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Usecase : %v", err)
+		return nil, shared_model.Paging{}, err
 	}
 
 	var employeesDto []dto.EmployeeResponse
