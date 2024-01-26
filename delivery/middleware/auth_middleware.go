@@ -4,7 +4,6 @@ import (
 	"booking-room/shared/common"
 	"booking-room/shared/service"
 	"booking-room/shared/shared_model"
-	"booking-room/usecase"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -12,12 +11,11 @@ import (
 )
 
 type Middleware struct {
-	authUC     usecase.AuthUC
 	jwtService service.JwtService
 }
 
-func NewMiddleware(authUC usecase.AuthUC, jwtService service.JwtService) *Middleware {
-	return &Middleware{authUC: authUC, jwtService: jwtService}
+func NewMiddleware(jwtService service.JwtService) *Middleware {
+	return &Middleware{jwtService: jwtService}
 }
 
 func (m *Middleware) NewAuth(ctx *gin.Context) {

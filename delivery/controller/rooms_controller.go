@@ -113,9 +113,10 @@ func (r *RoomController) listHandler(c *gin.Context) {
 	common.SendSuccessPagedResponse(c, http.StatusOK, response, paging)
 }
 
-func NewRoomController(roomUC usecase.RoomUseCase, rg *gin.RouterGroup) *RoomController {
+func NewRoomController(roomUC usecase.RoomUseCase, middleware *middleware.Middleware, rg *gin.RouterGroup) *RoomController {
 	return &RoomController{
-		roomUC: roomUC,
-		rg:     rg,
+		roomUC:     roomUC,
+		middleware: middleware,
+		rg:         rg,
 	}
 }

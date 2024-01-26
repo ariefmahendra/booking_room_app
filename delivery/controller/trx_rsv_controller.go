@@ -17,10 +17,11 @@ type TrxRsvController struct {
 	rg         *gin.RouterGroup
 }
 
-func NewTrxRsvpController(trxRsvpUC usecase.TrxRsvUsecase, rg *gin.RouterGroup) *TrxRsvController {
+func NewTrxRsvpController(trxRsvpUC usecase.TrxRsvUsecase, middleware *middleware.Middleware, rg *gin.RouterGroup) *TrxRsvController {
 	return &TrxRsvController{
-		trxRsvpUC: trxRsvpUC,
-		rg:        rg,
+		trxRsvpUC:  trxRsvpUC,
+		middleware: middleware,
+		rg:         rg,
 	}
 }
 

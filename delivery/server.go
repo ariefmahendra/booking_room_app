@@ -35,7 +35,7 @@ func (s *Server) InitRoute() {
 
 	// route for management room
 	rg := s.engine.Group("/api/v1/room")
-	controller.NewRoomController(s.roomUC, rg).Route()
+	controller.NewRoomController(s.roomUC, s.middleware, rg).Route()
 
 	// route for management facilities
 	fg := s.engine.Group("/api/v1/facilities")
@@ -43,7 +43,7 @@ func (s *Server) InitRoute() {
 
 	// route for management transaction
 	rs := s.engine.Group("/api/v1/reservation")
-	controller.NewTrxRsvpController(s.trxRsvpUC, rs).Route()
+	controller.NewTrxRsvpController(s.trxRsvpUC, s.middleware, rs).Route()
 }
 
 func (s *Server) Run() {
@@ -74,7 +74,7 @@ func NewServer() *Server {
 	jwtService := service.NewJwtService(cfg.TokenConfig)
 	authUC := usecase.NewAuthUC(employeeRepository, jwtService)
 
-	newMiddleware := middleware.NewMiddleware(authUC, jwtService)
+	newMiddleware := middleware.NewMiddleware(jwtService)
 
 	engine := gin.Default()
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
