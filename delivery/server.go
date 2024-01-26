@@ -25,7 +25,7 @@ type Server struct {
 }
 
 func (s *Server) InitRoute() {
-	s.engine.Use(s.middleware.NewAuth)
+	//s.engine.Use(s.middleware.NewAuth)
 
 	ar := s.engine.Group("/api/v1/auth")
 	controller.NewAuthController(s.authUC, ar).Route()
@@ -75,7 +75,7 @@ func NewServer() *Server {
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
 	roomUC := usecase.NewRoomUseCase(roomRepository)
 	reportUC := usecase.NewReportUsecase(reportRepo)
-	roomUC = usecase.NewRoomUseCase(roomRepository)	  
+	roomUC = usecase.NewRoomUseCase(roomRepository)
 	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo, roomUC)
 
 	jwtService := service.NewJwtService(cfg.TokenConfig)
