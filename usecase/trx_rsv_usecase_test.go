@@ -30,7 +30,7 @@ var expectedList = dto.TransactionDTO{
 	},
 }
 
-var expectedPaging = shared_model.Paging{
+var expectedPage = shared_model.Paging{
 	Page:        1,
 	TotalPages:  3,
 	TotalRows:   1,
