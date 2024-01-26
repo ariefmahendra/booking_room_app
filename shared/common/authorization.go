@@ -10,7 +10,7 @@ func AuthorizationAdmin(claims *shared_model.CustomClaims) bool {
 		return false
 	}
 
-	return false
+	return true
 }
 
 func AuthorizationGaAdmin(claims *shared_model.CustomClaims) bool {
@@ -18,5 +18,5 @@ func AuthorizationGaAdmin(claims *shared_model.CustomClaims) bool {
 		return false
 	}
 
-	return false
+	return true
 }
