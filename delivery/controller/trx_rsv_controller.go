@@ -33,7 +33,7 @@ func (t *TrxRsvController) Route() {
 	t.rg.POST("/", t.createRSVP)
 	// t.rg.PUT("/:id", t.editRSVP)
 	t.rg.DELETE("/:id", t.deleteRSVP)
-	t.rg.GET("/avaible",t.getAvaible)
+	t.rg.GET("/available",t.getAvailable)
 }
 
 func (t *TrxRsvController) getAll(c *gin.Context) {
@@ -161,6 +161,7 @@ func (t *TrxRsvController) getApprove(c *gin.Context)  {
 	common.SendPagedResponse(c, response, paging, "success")
 }
 
+/*
 func (t *TrxRsvController) editRSVP(c *gin.Context)  {
 	id := c.Param("id")
 
@@ -194,8 +195,9 @@ func (t *TrxRsvController) editRSVP(c *gin.Context)  {
 
 	common.SendSuccessResponse(c, http.StatusOK, payload)
 }
+*/
 
-func (t *TrxRsvController) getAvaible(c *gin.Context)  {
+func (t *TrxRsvController) getAvailable(c *gin.Context)  {
 	var avble dto.PayloadAvailable
 	if err := c.ShouldBindJSON(&avble); err != nil {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
