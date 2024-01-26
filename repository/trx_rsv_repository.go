@@ -61,6 +61,25 @@ func (t *trxRsvRepository) GetAvailableRoom(payload dto.PayloadAvailable) ([]str
 		return nil, err
 	}
 
+	if len(roomIDs) == 0 {
+		query = "SELECT id FROM mst_room"
+		rows, err := t.db.Query(query)
+		if err != nil {
+			log.Println("trxRsvRepository.Query", err.Error())
+			return nil, err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var roomID string
+			if err := rows.Scan(&roomID); err != nil {
+				log.Println("trxRsvRepository.Scan", err.Error())
+				return nil, err
+			}
+			roomIDs = append(roomIDs, roomID)
+		}
+		return roomIDs, nil
+	}
+
 	// Menghapus duplikat
 	uuidSet := make(map[string]struct{})
 	var uniqueUUIDs []string
@@ -72,9 +91,9 @@ func (t *trxRsvRepository) GetAvailableRoom(payload dto.PayloadAvailable) ([]str
 	}
 	// Menggabungkan UUID menjadi string
 	concatenatedIDs := "'" + strings.Join(uniqueUUIDs, "', '") + "'"
-	s := strings.Trim(concatenatedIDs, "'")
-	log.Println(concatenatedIDs)
-	log.Println(s)
+	// s := strings.Trim(concatenatedIDs, "'")
+	// // log.Println(concatenatedIDs)
+	// // log.Println(s)
 	
 	query = fmt.Sprintf("SELECT id FROM mst_room WHERE id NOT IN (%s)", concatenatedIDs)
 	var roomCodes []string
@@ -172,7 +191,7 @@ func (t *trxRsvRepository) GetApprovalList(page, size int) ([]dto.TransactionDTO
 		WHERE 
 			tx.approval_status = 'PENDING' AND tx.deleted_at IS NULL
 		ORDER BY 
-			tx.created_at ASC
+			tx.start_date ASC
 		LIMIT $1 OFFSET $2`
 
 	rows, err := t.db.Query(query, size, offset)
