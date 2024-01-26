@@ -48,7 +48,7 @@ func (e *EmployeeRepositoryImpl) GetDeletedEmployees(page, size int) ([]model.Em
 	}
 
 	totalRows := 0
-	err = e.db.QueryRow(config.PagingEmployee).Scan(&totalRows)
+	err = e.db.QueryRow(config.PagingEmployeeDeleted).Scan(&totalRows)
 	if err != nil {
 		return nil, shared_model.Paging{}, fmt.Errorf("GetDeletedEmployees.Repository : %v", err)
 	}
@@ -110,7 +110,7 @@ func (e *EmployeeRepositoryImpl) GetEmployeeById(id string) (model.EmployeeModel
 func (e *EmployeeRepositoryImpl) GetEmployeeByEmail(email string) (model.EmployeeModel, error) {
 	var employee model.EmployeeModel
 
-	err := e.db.QueryRow(config.GetEmployeeByEmail, email).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Password, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
+	err := e.db.QueryRow(config.GetEmployeeByEmail, email).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
 
 	if err != nil {
 		return model.EmployeeModel{}, fmt.Errorf("GetEmployeeByEmail.Repository : %v", err)
@@ -142,7 +142,7 @@ func (e *EmployeeRepositoryImpl) GetEmployees(page, size int) ([]model.EmployeeM
 
 	totalRows := 0
 
-	if err = e.db.QueryRow(config.PagingEmployee).Scan(&totalRows); err != nil {
+	if err = e.db.QueryRow(config.PagingEmployeeActive).Scan(&totalRows); err != nil {
 		return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Repository : %v", err)
 	}
 
