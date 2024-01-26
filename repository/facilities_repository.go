@@ -13,7 +13,6 @@ import (
 )
 
 type FacilitiesRepository interface {
-	//List() ([]model.Facilities, error)
 	List(page, size int) ([]dto.FacilitiesResponse, shared_model.Paging, error)
 	Get(id string) (model.Facilities, error)
 	GetName(name string) (model.Facilities, error)
@@ -37,6 +36,7 @@ func (f *facilitiesRepository) List(page, size int) ([]dto.FacilitiesResponse, s
 	//set max page
 	totalRows := 0
 	if err := f.db.QueryRow(config.RawPagingCount).Scan(&totalRows); err != nil {
+		log.Println("facilitiesRepository.QueryRow count", err.Error())
 		return nil, shared_model.Paging{}, err
 	}
 	paging := shared_model.Paging{
