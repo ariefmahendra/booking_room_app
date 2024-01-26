@@ -4,7 +4,6 @@ import (
 	"booking-room/model/dto"
 	"booking-room/repository"
 	"booking-room/shared/shared_model"
-	"strings"
 )
 
 type TrxRsvUsecase interface {
@@ -15,7 +14,6 @@ type TrxRsvUsecase interface {
 	UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error)
 	DeleteResv(id string) (string, error)
 	GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error)
-	UpdateResv(payload dto.PayloadReservationDTO) (dto.TransactionDTO, error)
 	GetAvailableRoom(payload dto.PayloadAvailable) ([]dto.RoomResponse, error)
 }
 
@@ -57,8 +55,6 @@ func (t *trxRsvUsecase) DeleteResv(id string) (string, error) {
 
 // UpdateStatus implements TrxRsvUsecase.
 func (t *trxRsvUsecase) UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error) {
-	acc := strings.ToUpper(payload.ApproveStatus)
-	payload.ApproveStatus = acc
 	if payload.ApproveNote == "" {
 		payload.ApproveNote = "Viewed by GA"
 	}
