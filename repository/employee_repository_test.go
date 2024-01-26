@@ -391,7 +391,6 @@ func (e *EmployeeRepositorySuite) TestGetDeletedEmployees_success() {
 	employees, paging, err := e.er.GetDeletedEmployees(ExpectedPaging.Page, ExpectedPaging.RowsPerPage)
 
 	e.Nil(err)
-	fmt.Println(err)
 	e.Equal(expectedEmployee[0].Id, employees[0].Id)
 	e.Equal(expectedEmployee[0].Name, employees[0].Name)
 	e.Equal(expectedEmployee[0].Email, employees[0].Email)
