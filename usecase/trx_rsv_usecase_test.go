@@ -41,8 +41,8 @@ var tesTransactionDTO = dto.PayloadReservationDTO{
 	Id:            "ID001",
 	Email:         "budi@mail.com",
 	RoomCode:      "R001",
-	// StartDate:     &parseTime("2024-01-25T09:00:00Z"),
-	// EndDate:       &parseTime("2024-01-27T11:00:00Z"),
+	StartDate:     pointerTime("2024-01-25T09:00:00Z"),
+	EndDate:       pointerTime("2024-01-27T11:00:00Z"),
 	Note:          "Team Meeting",
 	Facilities: []dto.Facility{
 		{
@@ -53,13 +53,23 @@ var tesTransactionDTO = dto.PayloadReservationDTO{
 	},
 }
 
-func parseTime(timeStr string) time.Time {
+func parseTime(timeStr string) time.Time{
 	layout := "2006-01-02T15:04:05Z"
 	parsedTime, err := time.Parse(layout, timeStr)
 	if err != nil {
 		fmt.Println("Error parsing time:", err)
 	}
 	return parsedTime
+}
+
+func pointerTime(timeStr string) *time.Time {
+	layout := "2006-01-02T15:04:05Z"
+	parsedTime, err := time.Parse(layout, timeStr)
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+		return nil
+	}
+	return &parsedTime
 }
 
 type TrxRsvUsecaseSuite struct {

@@ -7,6 +7,7 @@ import (
 	"booking-room/usecase"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,11 +37,11 @@ func (t *TrxRsvController) Route() {
 }
 
 func (t *TrxRsvController) getAll(c *gin.Context) {
-	// claims := t.middleware.GetUser(c)
-	// if ok := common.AuthorizationGaAdmin(claims); ok == false {
-	// 	common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
-	// 	return
-	// }
+	claims := t.middleware.GetUser(c)
+	if ok := common.AuthorizationGaAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
 
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
@@ -68,11 +69,11 @@ func (t *TrxRsvController) getID(c *gin.Context) {
 }
 
 func (t *TrxRsvController) getEmployee(c *gin.Context) {
-	// claims := t.middleware.GetUser(c)
-	// if ok := common.AuthorizationAdmin(claims); ok == false {
-	// 	common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
-	// 	return
-	// }
+	claims := t.middleware.GetUser(c)
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
 
 	id := c.Param("id")
 	page, _ := strconv.Atoi(c.Query("page"))
@@ -108,11 +109,11 @@ func (t *TrxRsvController) createRSVP(c *gin.Context) {
 }
 
 func (t *TrxRsvController) acceptRSVP(c *gin.Context) {
-	// claims := t.middleware.GetUser(c)
-	// if ok := common.AuthorizationGaAdmin(claims); ok == false {
-	// 	common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
-	// 	return
-	// }
+	claims := t.middleware.GetUser(c)
+	if ok := common.AuthorizationGaAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
 
 	// id := c.Param("id")
 	var acc dto.TransactionDTO
@@ -124,6 +125,13 @@ func (t *TrxRsvController) acceptRSVP(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, "accesment field failed")
 		return
 	}
+
+	acc.ApproveStatus = strings.ToUpper(acc.ApproveStatus)
+	if acc.ApproveStatus != "ACCEPT" && acc.ApproveStatus != "PENDING" && acc.ApproveStatus != "DECLINE" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "wrong approval status")
+		return
+	}
+	
 
 	a, err := t.trxRsvpUC.UpdateStatus(acc)
 	if err != nil {
@@ -166,7 +174,7 @@ func (t *TrxRsvController) getAvailable(c *gin.Context)  {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if avble.StartDate == "" && avble.EndDate == "" {
+	if avble.StartDate == "" || avble.EndDate == "" {
 		common.SendErrorResponse(c, http.StatusBadRequest, "required time range")
 		return
 	}
