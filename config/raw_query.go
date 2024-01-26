@@ -16,5 +16,18 @@ const (
 	RawUpdateEmployeeById      = `UPDATE mst_employee SET name = $1, email = $2, password = $3, division = $4, position = $5, role = $6, contact = $7, updated_at = (CURRENT_TIMESTAMP) WHERE id = $8 RETURNING id, name, email, division, position, role, contact, created_at, updated_at`
 	RAWQueryPaging             = `SELECT COUNT (*) FROM mst_employee`
 	//Facility Repository
-	RawPagingCount = `"SELECT COUNT (*) FROM mst_facilities WHERE deleted_at IS NULL`
+	RawPagingCount        = `"SELECT COUNT (*) FROM mst_facilities WHERE deleted_at IS NULL`
+	FacilitiesList        = `SELECT code_name, facilities_type, status FROM mst_facilities WHERE deleted_at IS NULL LIMIT $1 OFFSET $2`
+	FacilityGetId         = `SELECT * FROM mst_facilities WHERE id=$1 AND deleted_at IS NULL`
+	FacilityGetName       = `SELECT * FROM mst_facilities WHERE code_name=$1 AND deleted_at IS NULL`
+	FacilitiesCountStatus = `SELECT COUNT (*) FROM mst_facilities WHERE status=$1 AND deleted_at IS NULL`
+	FacilitiesGetStatus   = `SELECT code_name, facilities_type, status FROM mst_facilities WHERE status=$1 AND deleted_at IS NULL LIMIT $2 OFFSET $3`
+	FacilitiesCountType   = `SELECT COUNT (*) FROM mst_facilities WHERE facilities_type=$1 AND deleted_at IS NULL`
+	FacilitiesGetType     = `SELECT code_name, facilities_type, status FROM mst_facilities WHERE facilities_type=$1 AND deleted_at IS NULL LIMIT $2 OFFSET $3`
+	FacilityCountDeleted  = `SELECT COUNT (*) FROM mst_facilities WHERE deleted_at IS NOT NULL`
+	FacilityGetDeleted    = `SELECT * FROM mst_facilities WHERE deleted_at IS NOT NULL LIMIT $1 OFFSET $2`
+	FacilityInsert        = `INSERT INTO mst_facilities(code_name, facilities_type) VALUES($1, $2) RETURNING id, status, created_at`
+	FacilityUpdate        = `UPDATE mst_facilities SET code_name=$1, facilities_type=$2, status=$3, updated_at=current_timestamp WHERE id=$4 RETURNING id, code_name, facilities_type, status, updated_at`
+	FacilityDeleteById    = `UPDATE mst_facilities SET deleted_at=current_timestamp WHERE id=$1`
+	FAcilityDeleteByName  = `UPDATE mst_facilities SET deleted_at=current_timestamp WHERE code_name=$1`
 )
