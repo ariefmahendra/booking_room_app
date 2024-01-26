@@ -19,6 +19,7 @@ type Server struct {
 	roomUC       usecase.RoomUseCase
 	facilitiesUC usecase.FacilitiesUsecase
 	trxRsvpUC    usecase.TrxRsvUsecase
+	reportUC     usecase.ReportUsecase
 	engine       *gin.Engine
 	host         string
 }
@@ -40,6 +41,9 @@ func (s *Server) InitRoute() {
 	// route for management facilities
 	fg := s.engine.Group("/api/v1/facilities")
 	controller.NewFacilitiesController(s.facilitiesUC, s.middleware, fg).Route()
+
+	rp := s.engine.Group("/api/v1/report")
+	controller.NewReportController(s.reportUC, rp).Route()
 
 	// route for management transaction
 	rs := s.engine.Group("/api/v1/reservation")
@@ -65,11 +69,14 @@ func NewServer() *Server {
 	facilitiesRepository := repository.NewFacilitiesRepository(db)
 	employeeRepository := repository.NewEmployeeRepository(db)
 	trxRsvpRepo := repository.NewTrxRsvRepository(db)
+	reportRepo := repository.NewReportRepository(db)
 
 	faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
 	employeeUC := usecase.NewEmployeeUC(employeeRepository)
 	roomUC := usecase.NewRoomUseCase(roomRepository)
-	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo)
+	reportUC := usecase.NewReportUsecase(reportRepo)
+	roomUC = usecase.NewRoomUseCase(roomRepository)	  
+	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo, roomUC)
 
 	jwtService := service.NewJwtService(cfg.TokenConfig)
 	authUC := usecase.NewAuthUC(employeeRepository, jwtService)
@@ -86,6 +93,7 @@ func NewServer() *Server {
 		employeeUC:   employeeUC,
 		facilitiesUC: faciltiiesUC,
 		trxRsvpUC:    trxRsvpUC,
+		reportUC:     reportUC,
 		engine:       engine,
 		host:         host,
 	}
