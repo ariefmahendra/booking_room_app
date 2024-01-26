@@ -57,7 +57,7 @@ CREATE TABLE tx_room_reservation (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (employee_id) REFERENCES mst_employee(id),
-    FOREIGN KEY (room_id) REFERENCES mst_room(id),
+    FOREIGN KEY (room_id) REFERENCES mst_room(id)
 );
 
 CREATE TABLE tx_additional (

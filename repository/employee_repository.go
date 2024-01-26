@@ -87,7 +87,7 @@ func (e *EmployeeRepositoryImpl) UpdateEmployee(payload model.EmployeeModel) (mo
 }
 
 func (e *EmployeeRepositoryImpl) DeleteEmployeeById(id string) error {
-	_, err := e.db.Exec(config.EmployeeById, id)
+	_, err := e.db.Exec(config.DeleteEmployeeById, id)
 	if err != nil {
 		return err
 	}

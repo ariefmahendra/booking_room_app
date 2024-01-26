@@ -19,7 +19,7 @@ func NewMiddleware(jwtService service.JwtService) *Middleware {
 }
 
 func (m *Middleware) NewAuth(ctx *gin.Context) {
-	if !(ctx.FullPath() == "/api/v1/auth/login") {
+	if !(ctx.FullPath() == "/api/v1/auth/login" || ctx.FullPath() == "/api/v1/auth/register") {
 		fullToken := ctx.GetHeader("Authorization")
 
 		if fullToken == "" {

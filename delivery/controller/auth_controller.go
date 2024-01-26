@@ -20,6 +20,7 @@ func NewAuthController(authUC usecase.AuthUC, rg *gin.RouterGroup) *AuthControll
 
 func (a *AuthControllerImpl) Route() {
 	a.rg.POST("/login", a.LoginController)
+	a.rg.POST("/register", a.RegisterController)
 }
 
 func (a *AuthControllerImpl) LoginController(ctx *gin.Context) {
@@ -39,4 +40,22 @@ func (a *AuthControllerImpl) LoginController(ctx *gin.Context) {
 	}
 
 	common.SendSuccessResponse(ctx, http.StatusOK, response)
+}
+
+func (a *AuthControllerImpl) RegisterController(ctx *gin.Context) {
+	var request dto.EmployeeCreateRequest
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Printf("failed to bind json : %v", err)
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "bad request")
+		return
+	}
+
+	response, err := a.authUC.Register(request)
+	if err != nil {
+		log.Printf("failed to register : %v", err)
+		common.SendErrorResponse(ctx, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	common.SendSuccessResponse(ctx, http.StatusCreated, response)
 }
