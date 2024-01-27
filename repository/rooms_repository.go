@@ -15,7 +15,6 @@ type RoomRepository interface {
 	GetRoom(id string) (model.Room, error)
 	UpdateRoom(payload model.Room) (model.Room, error)
 	ListRoom(page, size int) ([]model.Room, shared_model.Paging, error)
-	UpdateStatusRoom(payload model.Room) (model.Room, error)
 }
 
 type roomRepository struct {
@@ -78,40 +77,41 @@ func (r *roomRepository) GetRoom(id string) (model.Room, error) {
 
 // List implements RoomRepository.
 func (r *roomRepository) ListRoom(page, size int) ([]model.Room, shared_model.Paging, error) {
-	var rooms []model.Room
-	offset := (page - 1) * size
+    var rooms []model.Room
+    offset := (page - 1) * size
 
-	rows, err := r.db.Query(config.SelectRoomList, size, offset)
-	if err != nil {
-		log.Println("roomRepository.ListQuery", err.Error())
-		return []model.Room{}, shared_model.Paging{}, err
-	}
+    rows, err := r.db.Query(config.SelectRoomList, size, offset)
+    if err != nil {
+        log.Println("roomRepository.ListQuery", err.Error())
+        return []model.Room{}, shared_model.Paging{}, err
+    }
 
-	for rows.Next() {
-		var room model.Room
-		err := rows.Scan(&room.Id, &room.CodeRoom, &room.RoomType, &room.Capacity, &room.Facilities, &room.CreatedAt, &room.UpdatedAt)
-		if err != nil {
-			log.Println("roomRepository.ListScan", err.Error())
-			return []model.Room{}, shared_model.Paging{}, err
-		}
+    for rows.Next() {
+        var room model.Room
+        err := rows.Scan(&room.Id, &room.CodeRoom, &room.RoomType, &room.Capacity, &room.Facilities, &room.CreatedAt, &room.UpdatedAt)
+        if err != nil {
+            log.Println("roomRepository.ListScan", err.Error())
+            return []model.Room{}, shared_model.Paging{}, err
+        }
 
-		rooms = append(rooms, room)
-	}
+        rooms = append(rooms, room)
+    }
 
-	totalRows := 0
-	if err := r.db.QueryRow(config.SelectCountRoom).Scan(&totalRows); err != nil {
-		return nil, shared_model.Paging{}, err
-	}
+    totalRows := 0
+    if err := r.db.QueryRow(config.SelectCountRoom).Scan(&totalRows); err != nil {
+        return nil, shared_model.Paging{}, err
+    }
 
-	paging := shared_model.Paging{
-		Page:        page,
-		RowsPerPage: size,
-		TotalRows:   totalRows,
-		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
-	}
+    paging := shared_model.Paging{
+        Page:        page,
+        RowsPerPage: size,
+        TotalRows:   totalRows,
+        TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
+    }
 
-	return rooms, paging, nil
+    return rooms, paging, nil
 }
+
 
 func NewRoomRepository(db *sql.DB) RoomRepository {
 	return &roomRepository{db: db}

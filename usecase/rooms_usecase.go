@@ -1,5 +1,6 @@
 package usecase
 
+
 import (
 	"booking-room/model"
 	"booking-room/repository"
@@ -27,7 +28,10 @@ func (r *roomUseCase) FindRoomById(id string) (model.Room, error) {
 
 // FindAllRoom implements RoomUseCase.
 func (r *roomUseCase) FindAllRoom(page, size int) ([]model.Room, shared_model.Paging, error) {
-	return r.repo.ListRoom(page, size)
+    if page == 0 && size == 0 {
+        page, size = 1, 5
+    }
+    return r.repo.ListRoom(page, size)
 }
 
 

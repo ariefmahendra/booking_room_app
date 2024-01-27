@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +31,7 @@ func (r *RoomController) getHandler(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusNotFound, fmt.Sprintf("Room with ID %s not found", id))
 		return
 	}
-	common.SendSingleResponse(c, room, "Ok")
+	common.SendSuccessResponse(c, http.StatusOK, room)
 }
 
 func (r *RoomController) createHandler(c *gin.Context) {
@@ -60,13 +59,6 @@ func (r *RoomController) updateHandler(c *gin.Context) {
 		return
 	}
 
-	// room, err := r.roomUC.UpdateRoom(payload)
-	// if err != nil {
-	//  common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-	//  return
-	// }
-	// common.SendCreateResponse(c, room, "Updated")
-
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "success",
@@ -75,34 +67,18 @@ func (r *RoomController) updateHandler(c *gin.Context) {
 }
 
 func (r *RoomController) listHandler(c *gin.Context) {
-	pageStr := c.DefaultQuery("page", "1")
-	sizeStr := c.DefaultQuery("size", "10")
+    page, _ := strconv.Atoi(c.Query("page"))
+    size, _ := strconv.Atoi(c.Query("size"))
 
-	page, err := strconv.Atoi(pageStr)
-	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Invalid page parameter: %s must be an integer", pageStr))
-		return
-	}
+    rooms, paging, err := r.roomUC.FindAllRoom(page, size)
+    if err != nil {
+        common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+        return
+    }
 
-	size, err := strconv.Atoi(sizeStr)
-	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Invalid size parameter: %s must be an integer", sizeStr))
-		return
-	}
-
-	rooms, paging, err := r.roomUC.FindAllRoom(page, size)
-	if err != nil {
-		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response := gin.H{
-		"rooms":  rooms,
-		"paging": paging,
-	}
-
-	common.SendListResponse(c, response, "Ok")
+    common.SendSuccessPagedResponse(c, http.StatusOK, rooms, paging)
 }
+
 
 func NewRoomController(roomUC usecase.RoomUseCase, rg *gin.RouterGroup) *RoomController {
 	return &RoomController{
