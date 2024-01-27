@@ -10,8 +10,8 @@ type JwtServiceMock struct {
 	mock.Mock
 }
 
-func (j *JwtServiceMock) GenerateToken(employeeId, role string) (dto.AuthResponse, error) {
-	args := j.Called(employeeId, role)
+func (j *JwtServiceMock) GenerateToken(employeeId, email, role string) (dto.AuthResponse, error) {
+	args := j.Called(employeeId, email, role)
 	return args.Get(0).(dto.AuthResponse), args.Error(1)
 }
 
