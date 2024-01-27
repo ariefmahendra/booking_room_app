@@ -13,6 +13,14 @@ func AuthorizationAdmin(claims *shared_model.CustomClaims) bool {
 	return true
 }
 
+func AuthorizationGa(claims *shared_model.CustomClaims) bool {
+	if claims == nil || strings.ToUpper(claims.Role) != "GA" {
+		return false
+	}
+
+	return true
+}
+
 func AuthorizationGaAdmin(claims *shared_model.CustomClaims) bool {
 	if claims == nil || strings.ToUpper(claims.Role) != "ADMIN" || strings.ToUpper(claims.Role) != "GA" {
 		return false
