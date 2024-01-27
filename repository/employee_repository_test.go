@@ -262,6 +262,7 @@ func (e *EmployeeRepositorySuite) TestGetEmployeeByEmail_success() {
 		"name",
 		"email",
 		"division",
+		"division",
 		"position",
 		"role",
 		"contact",
@@ -272,6 +273,7 @@ func (e *EmployeeRepositorySuite) TestGetEmployeeByEmail_success() {
 		expectedEmployee[0].Id,
 		expectedEmployee[0].Name,
 		expectedEmployee[0].Email,
+		expectedEmployee[0].Password,
 		expectedEmployee[0].Division,
 		expectedEmployee[0].Position,
 		expectedEmployee[0].Role,
@@ -391,7 +393,6 @@ func (e *EmployeeRepositorySuite) TestGetDeletedEmployees_success() {
 	employees, paging, err := e.er.GetDeletedEmployees(ExpectedPaging.Page, ExpectedPaging.RowsPerPage)
 
 	e.Nil(err)
-	fmt.Println(err)
 	e.Equal(expectedEmployee[0].Id, employees[0].Id)
 	e.Equal(expectedEmployee[0].Name, employees[0].Name)
 	e.Equal(expectedEmployee[0].Email, employees[0].Email)

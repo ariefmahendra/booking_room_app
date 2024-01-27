@@ -110,7 +110,7 @@ func (e *EmployeeRepositoryImpl) GetEmployeeById(id string) (model.EmployeeModel
 func (e *EmployeeRepositoryImpl) GetEmployeeByEmail(email string) (model.EmployeeModel, error) {
 	var employee model.EmployeeModel
 
-	err := e.db.QueryRow(config.GetEmployeeByEmail, email).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
+	err := e.db.QueryRow(config.GetEmployeeByEmail, email).Scan(&employee.Id, &employee.Name, &employee.Email, &employee.Password, &employee.Division, &employee.Position, &employee.Role, &employee.Contact, &employee.CreatedAt, &employee.UpdatedAt, &employee.DeletedAt)
 
 	if err != nil {
 		return model.EmployeeModel{}, fmt.Errorf("GetEmployeeByEmail.Repository : %v", err)
