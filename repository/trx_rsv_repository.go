@@ -215,25 +215,20 @@ func (t *trxRsvRepository) GetApprovalList(page, size int) ([]dto.TransactionDTO
 
 // DeleteResv implements TrxRsvRepository.
 func (t *trxRsvRepository) DeleteResv(id string) (string, error) {
-	query := "UPDATE tx_room_reservation SET deleted_at = (CURRENT_TIMESTAMP) WHERE id = $1"
-	_, err := t.db.Exec(query, id)
-	if err != nil {
-		log.Println("trxRsvRepository.DeleteResv", err.Error())
-		return "", err
+	err := helper.TxDeleteRSVP(t.db, id)
+	if err != nil{
+		return "Reservation Deleted Failed", err
 	}
 	return "Reservation Deleted", err
 }
 
 func (t *trxRsvRepository) UpdateStatus(payload dto.TransactionDTO) (dto.TransactionDTO, error) {
-	query := "UPDATE tx_room_reservation SET approval_status = $1, approval_note = $2 WHERE id = $3"
-
-	_, err := t.db.Exec(query, payload.ApproveStatus, payload.ApproveNote, payload.Id)
+	updateId, err := helper.TxApproval(t.db, payload)
 	if err != nil {
-		log.Println("trxRsvRepository.UpdateStatus", err.Error())
 		return dto.TransactionDTO{}, err
 	}
 
-	updatedTransaction, err := t.GetID(payload.Id)
+	updatedTransaction, err := t.GetID(updateId)
 	if err != nil {
 		log.Println("trxRsvRepository.GetTransactionByID", err.Error())
 		return dto.TransactionDTO{}, err
