@@ -42,13 +42,6 @@ var expectedEmployees = []model.EmployeeModel{
 	},
 }
 
-var expectedPaging = shared_model.Paging{
-	Page:        1,
-	RowsPerPage: 5,
-	TotalPages:  1,
-	TotalRows:   2,
-}
-
 type EmployeeUCSuite struct {
 	suite.Suite
 	erm *repo_mock.EmployeeMock
