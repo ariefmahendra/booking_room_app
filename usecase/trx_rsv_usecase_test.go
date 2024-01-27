@@ -30,20 +30,13 @@ var expectedList = dto.TransactionDTO{
 	},
 }
 
-var expectedPage = shared_model.Paging{
-	Page:        1,
-	TotalPages:  3,
-	TotalRows:   1,
-	RowsPerPage: 1,
-}
-
 var tesTransactionDTO = dto.PayloadReservationDTO{
-	Id:            "ID001",
-	Email:         "budi@mail.com",
-	RoomCode:      "R001",
-	StartDate:     pointerTime("2024-01-25T09:00:00Z"),
-	EndDate:       pointerTime("2024-01-27T11:00:00Z"),
-	Note:          "Team Meeting",
+	Id:        "ID001",
+	Email:     "budi@mail.com",
+	RoomCode:  "R001",
+	StartDate: pointerTime("2024-01-25T09:00:00Z"),
+	EndDate:   pointerTime("2024-01-27T11:00:00Z"),
+	Note:      "Team Meeting",
 	Facilities: []dto.Facility{
 		{
 			Id:   "F001",
@@ -53,7 +46,7 @@ var tesTransactionDTO = dto.PayloadReservationDTO{
 	},
 }
 
-func parseTime(timeStr string) time.Time{
+func parseTime(timeStr string) time.Time {
 	layout := "2006-01-02T15:04:05Z"
 	parsedTime, err := time.Parse(layout, timeStr)
 	if err != nil {
