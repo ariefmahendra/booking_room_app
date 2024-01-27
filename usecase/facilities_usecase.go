@@ -10,7 +10,6 @@ import (
 )
 
 type FacilitiesUsecase interface {
-	//List() ([]model.Facilities, error)
 	List(page, size int) ([]dto.FacilitiesResponse, shared_model.Paging, error)
 	Get(id string) (model.Facilities, error)
 	GetByName(name string) (model.Facilities, error)

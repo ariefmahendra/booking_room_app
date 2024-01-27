@@ -20,7 +20,7 @@ const (
 	PagingEmployeeDeleted = `SELECT COUNT(*) FROM mst_employee WHERE deleted_at IS NOT NULL`
 
 	//Facility Repository
-	RawPagingCount        = `"SELECT COUNT (*) FROM mst_facilities WHERE deleted_at IS NULL`
+	RawPagingCount        = `SELECT COUNT (*) FROM mst_facilities WHERE deleted_at IS NULL`
 	FacilitiesList        = `SELECT code_name, facilities_type, status FROM mst_facilities WHERE deleted_at IS NULL LIMIT $1 OFFSET $2`
 	FacilityGetId         = `SELECT * FROM mst_facilities WHERE id=$1 AND deleted_at IS NULL`
 	FacilityGetName       = `SELECT * FROM mst_facilities WHERE code_name=$1 AND deleted_at IS NULL`

@@ -63,23 +63,6 @@ func updateStatusFacility(id string, tx *sql.Tx) {
 }
 
 
-
-//  UPDATE DATA
-func updateRSVP(payload model.Transaction, tx *sql.Tx) {
-	query := "UPDATE tx_room_reservation SET room_id = $1, start_date = $2, end_date = $3, notes = $4 WHERE id = $5"
-	_, err := tx.Exec(query, payload.RoomId, payload.StartDate, payload.EndDate, payload.Note, payload.Id)
-
-	if err != nil {
-		log.Println("Error updating data:", err)
-		validate(err, "updateRSVP", tx)
-	} else {
-		log.Println("Successfully updated data")
-	}
-}
-
-
-
-
 func validate(err error, message string, tx *sql.Tx)  {
 	if err != nil{
 		tx.Rollback()

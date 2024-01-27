@@ -35,3 +35,11 @@ func (m *RsvRepoMock) DeleteResv(id string) (string, error){
 	args := m.Called(id)
 	return args.String(0), args.Error(1)
 }
+func (m *RsvRepoMock) GetApprovalList(page, size int) ([]dto.TransactionDTO, shared_model.Paging, error){
+	args := m.Called(page, size)
+	return args.Get(0).([]dto.TransactionDTO), args.Get(1).(shared_model.Paging), args.Error(2)
+}
+func (m *RsvRepoMock) 	GetAvailableRoom(payload dto.PayloadAvailable) ([]string, error){
+	args := m.Called(payload)
+	return args.Get(0).([]string), args.Error(1)
+}
