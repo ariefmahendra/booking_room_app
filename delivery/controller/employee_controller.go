@@ -38,7 +38,7 @@ func (e *EmployeeControllerImpl) GetDeletedEmployees(ctx *gin.Context) {
 	isOk := common.AuthorizationAdmin(claims)
 
 	if !isOk {
-		log.Printf("authorization failed : %v", claims)
+		log.Println("authorization failed because user is not admin")
 		common.SendErrorResponse(ctx, http.StatusForbidden, "forbidden")
 		return
 	}
@@ -62,6 +62,7 @@ func (e *EmployeeControllerImpl) GetDeletedEmployees(ctx *gin.Context) {
 func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
 	if ok := common.AuthorizationAdmin(claims); ok == false {
+		log.Println("authorization failed because user is not admin")
 		common.SendErrorResponse(ctx, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -70,7 +71,7 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 
 	err := ctx.Bind(&employeeReq)
 	if err != nil {
-		log.Printf("failed to bind json create employee: %v", err)
+		log.Printf("failed to bind json create employee : %v", err)
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid request")
 		return
 	}
@@ -115,9 +116,15 @@ func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 	employeeId := ctx.Param("id")
 	employee.Id = employeeId
 
+	if ok := common.ValidateEmail(employee.Email); ok == false {
+		log.Printf("invalid email : %v", employee.Email)
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email")
+		return
+	}
+
 	employeeDto, err := e.employeeUC.UpdateEmployee(employee)
 	if err != nil {
-		log.Printf("failed to update employee : %v", err)
+		log.Println(err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to updating employee")
 		return
 	}
@@ -137,7 +144,7 @@ func (e *EmployeeControllerImpl) DeleteEmployee(ctx *gin.Context) {
 
 	err := e.employeeUC.DeleteEmployeeById(employeeId)
 	if err != nil {
-		log.Printf("failed to delete employee : %v", err)
+		log.Println(err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to delete employee")
 		return
 	}
@@ -147,15 +154,19 @@ func (e *EmployeeControllerImpl) DeleteEmployee(ctx *gin.Context) {
 
 func (e *EmployeeControllerImpl) GetEmployeeById(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
-	if claims == nil {
-		return
-	}
+	ok := common.AuthorizationAdmin(claims)
 
 	employeeId := ctx.Param("id")
 
+	if employeeId != claims.Id && !ok {
+		log.Println("authorization failed because user id not match and user is not admin")
+		common.SendErrorResponse(ctx, http.StatusForbidden, "Forbidden access to other user")
+		return
+	}
+
 	employeeById, err := e.employeeUC.GetEmployeeById(employeeId)
 	if err != nil {
-		fmt.Printf("failed to get employee by id : %v", err)
+		fmt.Print(err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to get employee")
 		return
 	}
@@ -164,11 +175,20 @@ func (e *EmployeeControllerImpl) GetEmployeeById(ctx *gin.Context) {
 }
 
 func (e *EmployeeControllerImpl) GetEmployeeByEmail(ctx *gin.Context) {
+	claims := e.middleware.GetUser(ctx)
+	ok := common.AuthorizationAdmin(claims)
+
 	employeeEmail := ctx.Param("email")
+
+	if employeeEmail != claims.Email && !ok {
+		log.Println("authorization failed because user id not match and user is not admin")
+		common.SendErrorResponse(ctx, http.StatusForbidden, "Forbidden access to other user")
+		return
+	}
 
 	employeeByEmail, err := e.employeeUC.GetEmployeeByEmail(employeeEmail)
 	if err != nil {
-		fmt.Printf("failed to get employee by email : %v", err)
+		fmt.Print(err)
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to get employee")
 		return
 	}
@@ -181,7 +201,7 @@ func (e *EmployeeControllerImpl) GetEmployees(ctx *gin.Context) {
 	isOk := common.AuthorizationAdmin(claims)
 
 	if !isOk {
-		log.Printf("authorization failed : %v", claims)
+		log.Println("authorization failed because user is not admin")
 		common.SendErrorResponse(ctx, http.StatusForbidden, "forbidden")
 		return
 	}

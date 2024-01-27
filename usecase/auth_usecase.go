@@ -66,7 +66,8 @@ func (a *AuthUCImpl) Login(request dto.AuthRequest) (dto.AuthResponse, error) {
 		return dto.AuthResponse{}, errors.New("invalid email or email")
 	}
 
-	authResponse, err := a.jwtService.GenerateToken(userByEmail.Id, userByEmail.Role)
+	fmt.Println("Auth usecase : ", userByEmail.Id)
+	authResponse, err := a.jwtService.GenerateToken(userByEmail.Id, userByEmail.Email, userByEmail.Role)
 	if err != nil {
 		return dto.AuthResponse{}, err
 	}
