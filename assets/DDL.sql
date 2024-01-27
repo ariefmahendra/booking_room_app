@@ -52,7 +52,6 @@ CREATE TABLE tx_room_reservation (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     employee_id uuid,
     room_id UUID,
-    additional_id uuid,
     start_date TIMESTAMP,
     end_date TIMESTAMP,
     notes VARCHAR(255),
@@ -62,8 +61,7 @@ CREATE TABLE tx_room_reservation (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (employee_id) REFERENCES mst_employee(id),
-    FOREIGN KEY (room_id) REFERENCES mst_room(id),
-    FOREIGN KEY (additional_id) REFERENCES mst_facilities(id)
+    FOREIGN KEY (room_id) REFERENCES mst_room(id)
 );
 
 CREATE TABLE tx_additional (
