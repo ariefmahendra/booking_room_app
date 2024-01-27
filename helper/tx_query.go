@@ -37,7 +37,7 @@ func TxDeleteRSVP(db *sql.DB, id string) error {
 	query := "UPDATE tx_room_reservation SET deleted_at = (CURRENT_TIMESTAMP) WHERE id = $1"
 	_, err = tx.Exec(query, id)
 	if err != nil {
-		validate(err, "deleteRSVP", tx)
+		Validate(err, "deleteRSVP", tx)
 		return err
 	} else {
 		log.Println("Successfully delete reservation with ID:", id)
@@ -49,7 +49,7 @@ func TxDeleteRSVP(db *sql.DB, id string) error {
 	for _, f := range idFcltys {
 		updateStatusFacilityAvailable(f, tx)
 		if err != nil {
-			validate(err, "updateFacilityStatus", tx)
+			Validate(err, "updateFacilityStatus", tx)
 			return err
 		}
 	}
@@ -73,7 +73,7 @@ func TxApproval(db *sql.DB, payload dto.TransactionDTO) (string, error) {
 	query := "UPDATE tx_room_reservation SET approval_status = $1, approval_note = $2 WHERE id = $3"
 	_, err = tx.Exec(query, payload.ApproveStatus, payload.ApproveNote, payload.Id)
 	if err != nil {
-		validate(err, "updatedRSVP", tx)
+		Validate(err, "updatedRSVP", tx)
 		return payload.Id, err
 	} else {
 		log.Println("Successfully update reservation status with ID:", payload.Id)
@@ -86,7 +86,7 @@ func TxApproval(db *sql.DB, payload dto.TransactionDTO) (string, error) {
 		for _, f := range idFcltys {
 			err := updateStatusFacilityBooked(f, tx)
 			if err != nil {
-				validate(err, "updateFacilityStatus", tx)
+				Validate(err, "updateFacilityStatus", tx)
 				break
 			}
 		}
@@ -95,7 +95,7 @@ func TxApproval(db *sql.DB, payload dto.TransactionDTO) (string, error) {
 		for _, f := range idFcltys {
 			err := updateStatusFacilityAvailable(f, tx)
 			if err != nil {
-				validate(err, "updateFacilityStatus", tx)
+				Validate(err, "updateFacilityStatus", tx)
 				break
 			}
 		}
@@ -125,7 +125,7 @@ func insertRSVP(payload model.Transaction, tx *sql.Tx) string {
 
 	err := tx.QueryRow(query, payload.EmployeeId, payload.RoomId, payload.StartDate, payload.EndDate, payload.Note, payload.ApproveNote).Scan(&idTrx)
 	if err != nil {
-		validate(err, "insertRSVP", tx)
+		Validate(err, "insertRSVP", tx)
 	} else {
 		log.Println("Successfully inserted data with ID:", idTrx)
 	}
@@ -138,7 +138,7 @@ func insertFacility(payload model.Transaction, tx *sql.Tx, idRSVP string) {
 		_, err := tx.Exec(query, idRSVP, f.Id)
 		updateStatusFacilityRequest(f.Id, tx)
 		if err != nil {
-			validate(err, "insertFacility", tx)
+			Validate(err, "insertFacility", tx)
 			return
 		}
 	}
@@ -154,7 +154,7 @@ func facId(id string, tx *sql.Tx) ([]string, error) {
 	for rows.Next() {
 		var idFclty string
 		if err := rows.Scan(&idFclty); err != nil {
-			validate(err, "select id facility", tx)
+			Validate(err, "select id facility", tx)
 			return idFcltys, err
 		}
 		idFcltys = append(idFcltys, idFclty)
@@ -167,7 +167,7 @@ func updateStatusFacilityRequest(id string, tx *sql.Tx) {
 	query :=  "UPDATE mst_facilities SET status = 'REQUEST' WHERE id = $1"
 	_, err := tx.Exec(query, id)
 	if err != nil {
-		validate(err, "updateFacilityStatus", tx)
+		Validate(err, "updateFacilityStatus", tx)
 		return
 	}
 }
@@ -176,7 +176,7 @@ func updateStatusFacilityAvailable(id string, tx *sql.Tx) error{
 	query :=  "UPDATE mst_facilities SET status = 'AVAILABLE' WHERE id = $1"
 	_, err := tx.Exec(query, id)
 	if err != nil {
-		validate(err, "updateFacilityStatus", tx)
+		Validate(err, "updateFacilityStatus", tx)
 		return err
 	}
 	return err
@@ -186,14 +186,14 @@ func updateStatusFacilityBooked(id string, tx *sql.Tx)error {
 	query :=  "UPDATE mst_facilities SET status = 'BOOKED' WHERE id = $1"
 	_, err := tx.Exec(query, id)
 	if err != nil {
-		validate(err, "updateFacilityStatus", tx)
+		Validate(err, "updateFacilityStatus", tx)
 		return err
 	}
 	return err
 }
 
 
-func validate(err error, message string, tx *sql.Tx)  {
+func Validate(err error, message string, tx *sql.Tx)  {
 	if err != nil{
 		tx.Rollback()
 		log.Println(err, "Transaction Rollback!")
