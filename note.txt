@@ -1,0 +1,48 @@
+##############   BODY REQUEST BODY JSON   ##############
+
+# body request on POST "/rsvp" without facility request
+{
+  "email": "budi@mail.com",
+  "room_code": "R001",
+  "booked_start_date": "2024-01-25T09:00:00Z",
+  "booked_end_date": "2024-01-27T11:00:00Z",
+  "note": "Team Meeting"
+}
+
+
+# body POST "/rsvp" with facility request
+{
+  "email": "budi@mail.com",
+  "room_code": "R001",
+  "booked_start_date": "2024-01-25T09:00:00Z",
+  "booked_end_date": "2024-01-27T11:00:00Z",
+  "note": "Tesss",
+  "facilities": [
+    {
+      "code": "SCR1"
+    },
+    {
+      "code": "PRJ3"
+    }
+  ]
+}
+
+
+# body request on PUT "/rsvp" to approve without apprv_note
+{
+  "id": "b8898c64-5920-43c2-8486-52ffcc9b5e1f",
+  "approval_status": "accept"
+}
+
+# body request on PUT "/rsvp" to approve with apprv_note
+{
+  "id": "b8898c64-5920-43c2-8486-52ffcc9b5e1f",
+  "approval_status": "decline",
+  "apprv_note": "forbidden"
+}
+
+# body request on get avaiable room
+{
+  "start_date": "2024-02-01 09:00:00",
+  "end_date": "2024-02-02 11:00:00"
+}

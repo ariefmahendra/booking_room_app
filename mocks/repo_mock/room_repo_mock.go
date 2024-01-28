@@ -1,12 +1,13 @@
-package room_repo_mock
+package repo_mock
 
 import (
-    "booking-room/model"
-    "booking-room/shared/shared_model"
-    "github.com/stretchr/testify/mock"
+	"booking-room/model"
+	"booking-room/shared/shared_model"
+
+	"github.com/stretchr/testify/mock"
 )
 
-// RoomRepositoryMock adalah implementasi palsu dari RoomRepository untuk keperluan pengujian.
+
 type RoomRepositoryMock struct {
     mock.Mock
 }

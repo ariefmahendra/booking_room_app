@@ -1,19 +1,23 @@
 package controller
 
 import (
+	"booking-room/delivery/middleware"
 	"booking-room/model"
+	"booking-room/model/dto"
 	"booking-room/shared/common"
 	"booking-room/usecase"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
 	"github.com/gin-gonic/gin"
 )
 
 type RoomController struct {
-	roomUC usecase.RoomUseCase
-	rg     *gin.RouterGroup
+	roomUC     usecase.RoomUseCase
+	middleware *middleware.Middleware
+	rg         *gin.RouterGroup
 }
 
 func (r *RoomController) Route() {
@@ -23,7 +27,6 @@ func (r *RoomController) Route() {
 	r.rg.GET("/:id", r.getHandler)
 }
 
-// sudah benar
 func (r *RoomController) getHandler(c *gin.Context) {
 	id := c.Param("id")
 	room, err := r.roomUC.FindRoomById(id)
@@ -39,6 +42,16 @@ func (r *RoomController) createHandler(c *gin.Context) {
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		log.Println("Error binding JSON:", err.Error())
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+	claims := r.middleware.GetUser(c)
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
+
+	var payload dto.RoomRequest
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		log.Println("Error binding JSON:", err.Error())
+		common.SendErrorResponse(c, http.StatusBadRequest, "Bad Request")
 		return
 	}
 
@@ -49,40 +62,67 @@ func (r *RoomController) createHandler(c *gin.Context) {
 		return
 	}
 
-	common.SendCreateResponse(c, room, "Created")
+	common.SendSuccessResponse(c, http.StatusOK, room)
+}
 }
 
 func (r *RoomController) updateHandler(c *gin.Context) {
-	var payload model.Room
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+	claims := r.middleware.GetUser(c)
+	if ok := common.AuthorizationAdmin(claims); ok == false {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "success",
-		"data":    payload,
-	})
+	var payload dto.RoomRequest
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "Bad Request")
+		return
+	}
+
+	room, err := r.roomUC.UpdateRoom(payload)
+	if err != nil {
+		log.Println("Error updating room:", err.Error())
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	common.SendSuccessResponse(c, http.StatusOK, room)
 }
 
 func (r *RoomController) listHandler(c *gin.Context) {
-    page, _ := strconv.Atoi(c.Query("page"))
-    size, _ := strconv.Atoi(c.Query("size"))
+	pageStr := c.DefaultQuery("page", "1")
+	sizeStr := c.DefaultQuery("size", "10")
 
-    rooms, paging, err := r.roomUC.FindAllRoom(page, size)
-    if err != nil {
-        common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-        return
-    }
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Invalid page parameter: %s must be an integer", pageStr))
+		return
+	}
 
-    common.SendSuccessPagedResponse(c, http.StatusOK, rooms, paging)
+	size, err := strconv.Atoi(sizeStr)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Invalid size parameter: %s must be an integer", sizeStr))
+		return
+	}
+
+	rooms, paging, err := r.roomUC.FindAllRoom(page, size)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := gin.H{
+		"rooms":  rooms,
+		"paging": paging,
+	}
+
+	common.SendSuccessPagedResponse(c, http.StatusOK, response, paging)
 }
 
-
-func NewRoomController(roomUC usecase.RoomUseCase, rg *gin.RouterGroup) *RoomController {
+func NewRoomController(roomUC usecase.RoomUseCase, middleware *middleware.Middleware, rg *gin.RouterGroup) *RoomController {
 	return &RoomController{
-		roomUC: roomUC,
-		rg:     rg,
+		roomUC:     roomUC,
+		middleware: middleware,
+		rg:         rg,
 	}
 }

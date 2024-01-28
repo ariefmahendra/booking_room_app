@@ -1,204 +1,161 @@
 package usecase
 
 import (
-	"booking-room/mocks/room_usecase_mock"
+	"booking-room/mocks/repo_mock"
 	"booking-room/model"
 	"booking-room/model/dto"
+	"booking-room/shared/common"
 	"booking-room/shared/shared_model"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
+	"fmt"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	//"time"
+	"testing"
+	"time"
 )
 
-var expectedRoom = model.Room{
-	Id:         "a3d8e4ef-2e85-4ea5-9509-795f256226c3",
-	CodeRoom:   "Ruang Candradimuka",
-	RoomType:   "Ruang Meeting",
-	Capacity:   42,
-	Facilities: "available",
-}
+var now = time.Date(2024, 1, 27, 7, 12, 4, 692220000, time.Local)
 
 var expectedRooms = []model.Room{
 	{
-		Id:         "a3d8e4ef-2e85-4ea5-9509-795f256226c3",
-		CodeRoom:   "Ruang Candradimuka",
-		RoomType:   "Ruang Meeting",
-		Capacity:   42,
-		Facilities: "available",
+		Id:           "1",
+		CodeRoom:     "101",
+		RoomType:     "Standard",
+		Capacity:     2,
+		Facilities:   "Basic Facilities",
+		CreatedAt:    now,
+		UpdatedAt:    now,
+		DeletedAt:    &now,
 	},
 	{
-		Id:         "e058c04a-7a41-4299-b618-a15e300b3554",
-		CodeRoom:   "Ruang Bratasena",
-		RoomType:   "Ruang Konferensi",
-		Capacity:   21,
-		Facilities: "booked",
+		Id:           "2",
+		CodeRoom:     "201",
+		RoomType:     "Deluxe",
+		Capacity:     4,
+		Facilities:   "Luxury Facilities",
+		CreatedAt:    now,
+		UpdatedAt:    now,
+		DeletedAt:    &now,
 	},
 }
 
-var page int = 1
-var size int = 5
-
-var expectedPaging = shared_model.Paging{
-	Page:        page,
-	RowsPerPage: size,
-	TotalRows:   2,
-	TotalPages:  1,
-}
-
-type RoomUseCaseTestSuite struct {
+type RoomUCSuite struct {
 	suite.Suite
-	mockUsecase *room_usecase_mock.RoomUsecaseMock
-	uc          RoomUseCase
+	rrm   *repo_mock.RoomMock
+	ruc   RoomUC
 }
 
-func (suite *RoomUseCaseTestSuite) SetupTest() {
-	suite.mockUsecase = new(room_usecase_mock.RoomUsecaseMock)
-	suite.uc = NewRoomUseCase(suite.mockUsecase)
+func TestRoomUCSuite(t *testing.T) {
+	suite.Run(t, new(RoomUCSuite))
 }
 
-func (suite *RoomUseCaseTestSuite) TestFindAllRoom() {
-	suite.mockUsecase.On("FindAllRoom", page, size).Return(expectedRooms, expectedPaging, nil)
-
-	actual, paging, err := suite.uc.FindAllRoom(page, size)
-
-	assert.Nil(suite.T(), err)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), expectedRooms[0].CodeRoom, actual[0].CodeRoom)
-	assert.Equal(suite.T(), expectedPaging.Page, paging.Page)
+func (r *RoomUCSuite) SetupTest() {
+	r.rrm = new(repo_mock.RoomMock)
+	r.ruc = NewRoomUC(r.rrm)
 }
 
-func (suite *RoomUseCaseTestSuite) TestFindroomByID() {
-	suite.mockUsecase.On("FindRoomById", expectedRoom.Id).Return(dto.RoomResponse{
-		Id:         expectedRoom.Id,
-		CodeRoom:   expectedRoom.CodeRoom,
-		RoomType:   expectedRoom.RoomType,
-		Facilities: expectedRoom.Facilities,
-		Capacity:   expectedRoom.Capacity,
-	}, nil)
+func (r *RoomUCSuite) TestGetDeletedRooms_success() {
+	r.rrm.On("GetDeletedRooms", expectedPaging.Page, expectedPaging.RowsPerPage).Return(expectedRooms, expectedPaging, nil)
 
-	actual, err := suite.uc.FindRoomById(expectedRoom.Id)
+	var expectedResponses []dto.RoomResponse
+	for _, room := range expectedRooms {
+		roomRes := common.RoomModelToResponse(room)
+		expectedResponses = append(expectedResponses, roomRes)
+	}
 
-	assert.Nil(suite.T(), err)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), expectedRoom.CodeRoom, actual.CodeRoom)
+	rooms, paging, err := r.ruc.GetDeletedRooms(expectedPaging.Page, expectedPaging.RowsPerPage)
+
+	r.Nil(err)
+	r.Equal(expectedResponses, rooms)
+	r.Equal(expectedPaging, paging)
 }
 
-func (suite *RoomUseCaseTestSuite) TestRegisterNewRoom_Success() {
-	suite.mockUsecase.On("RegisterNewRoom", expectedRoom).Return(dto.RoomResponse{
-		Id:         expectedRoom.Id,
-		CodeRoom:   expectedRoom.CodeRoom,
-		RoomType:   expectedRoom.RoomType,
-		Facilities: expectedRoom.Facilities,
-		Capacity:   expectedRoom.Capacity,
-	}, nil)
+func (r *RoomUCSuite) TestGetDeletedRooms_failure() {
+	r.rrm.On("GetDeletedRooms", expectedPaging.Page, expectedPaging.RowsPerPage).Return([]model.RoomModel{}, shared_model.Paging{}, fmt.Errorf("error"))
 
-	actual, err := suite.uc.RegisterNewRoom(expectedRoom)
+	rooms, paging, err := r.ruc.GetDeletedRooms(expectedPaging.Page, expectedPaging.RowsPerPage)
 
-	assert.Nil(suite.T(), err)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), expectedRoom.CodeRoom, actual.CodeRoom)
+	r.NotNil(err)
+	r.Empty(rooms)
+	r.Empty(paging)
 }
 
-func (suite *RoomUseCaseTestSuite) TestRegisterNewRoom_EmptyStatusSuccess() {
-	expectedPayload := expectedRoom
-	expectedPayload.Facilities = ""
+func (r *RoomUCSuite) TestGetRoomById_success() {
+	r.rrm.On("GetRoomById", expectedRooms[0].Id).Return(expectedRooms[0], nil)
 
-	suite.mockUsecase.On("RegisterNewRoom", expectedPayload).Return(dto.RoomResponse{
-		Id:         expectedPayload.Id,
-		CodeRoom:   expectedPayload.CodeRoom,
-		RoomType:   expectedPayload.RoomType,
-		Facilities: expectedPayload.Facilities,
-		Capacity:   expectedPayload.Capacity,
-	}, nil)
+	room, err := r.ruc.GetRoomById(expectedRooms[0].Id)
 
-	_, err := suite.uc.RegisterNewRoom(expectedRoom)
-	expectedRoom.Facilities = "available"
-
-	assert.Nil(suite.T(), err)
-	assert.NoError(suite.T(), err)
+	r.Nil(err)
+	r.Equal(common.RoomModelToResponse(expectedRooms[0]), room)
 }
 
-func (suite *RoomUseCaseTestSuite) TestRegisterNewRoom_Failure() {
-	suite.mockUsecase.On("RegisterNewRoom", expectedRoom).Return(dto.RoomResponse{}, someError)
+func (r *RoomUCSuite) TestGetRoomById_failure() {
+	r.rrm.On("GetRoomById", expectedRooms[0].Id).Return(model.RoomModel{}, fmt.Errorf("error"))
 
-	_, err := suite.uc.RegisterNewRoom(expectedRoom)
+	room, err := r.ruc.GetRoomById(expectedRooms[0].Id)
 
-	assert.NotNil(suite.T(), err)
-	assert.Error(suite.T(), err)
+	r.NotNil(err)
+	r.Equal(dto.RoomResponse{}, room)
 }
 
-func (suite *RoomUseCaseTestSuite) TestRegisterNewRoom_EmptyFieldFailure() {
-	expectedRoom.CodeRoom = ""
-	_, err := suite.uc.RegisterNewRoom(expectedRoom)
-	expectedRoom.CodeRoom = "Ruang Candradimuka"
+func (r *RoomUCSuite) TestGetRooms_success() {
+	r.rrm.On("GetRooms", expectedPaging.Page, expectedPaging.RowsPerPage).Return(expectedRooms, expectedPaging, nil)
 
-	assert.NotNil(suite.T(), err)
-	assert.Error(suite.T(), err)
+	var expectedResponses []dto.RoomResponse
+	for _, room := range expectedRooms {
+		roomRes := common.RoomModelToResponse(room)
+		expectedResponses = append(expectedResponses, roomRes)
+	}
+
+	rooms, paging, err := r.ruc.GetRooms(expectedPaging.Page, expectedPaging.RowsPerPage)
+
+	r.Nil(err)
+	r.Equal(expectedResponses, rooms)
+	r.Equal(expectedPaging, paging)
 }
 
-func (suite *RoomUseCaseTestSuite) TestUpdateRoom_Success() {
-	suite.mockUsecase.On("UpdateRoom", expectedRoom).Return(dto.RoomResponse{
-		Id:         expectedRoom.Id,
-		CodeRoom:   expectedRoom.CodeRoom,
-		RoomType:   expectedRoom.RoomType,
-		Facilities: expectedRoom.Facilities,
-		Capacity:   expectedRoom.Capacity,
-	}, nil)
+func (r *RoomUCSuite) TestGetRooms_failure() {
+	r.rrm.On("GetRooms", expectedPaging.Page, expectedPaging.RowsPerPage).Return([]model.RoomModel{}, shared_model.Paging{}, fmt.Errorf("error"))
 
-	actual, err := suite.uc.UpdateRoom(expectedRoom)
+	rooms, paging, err := r.ruc.GetRooms(expectedPaging.Page, expectedPaging.RowsPerPage)
 
-	assert.Nil(suite.T(), err)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), expectedRoom.CodeRoom, actual.CodeRoom)
+	r.NotNil(err)
+	r.Empty(rooms)
+	r.Equal(shared_model.Paging{}, paging)
 }
 
-func (suite *RoomUseCaseTestSuite) TestUpdateRoom_Failure() {
-	suite.mockUsecase.On("UpdateRoom", expectedRoom).Return(dto.RoomResponse{}, someError)
+func (r *RoomUCSuite) TestCreateRoom_success() {
+	r.rrm.On("InsertRoom", mock.Anything).Return(expectedRooms[0], nil)
 
-	_, err := suite.uc.UpdateRoom(expectedRoom)
+	room, err := r.ruc.CreateRoom(expectedRooms[0])
 
-	assert.NotNil(suite.T(), err)
-	assert.Error(suite.T(), err)
+	r.Nil(err)
+	r.Equal(common.RoomModelToResponse(expectedRooms[0]), room)
 }
 
-func (suite *RoomUseCaseTestSuite) TestUpdateRoom_EmptyFieldFailure() {
-	expectedRoom.CodeRoom = ""
-	_, err := suite.uc.UpdateRoom(expectedRoom)
-	expectedRoom.CodeRoom = "Ruang Candradimuka"
+func (r *RoomUCSuite) TestCreateRoom_failure() {
+	r.rrm.On("InsertRoom", mock.Anything).Return(model.RoomModel{}, fmt.Errorf("error"))
 
-	assert.NotNil(suite.T(), err)
-	assert.Error(suite.T(), err)
+	room, err := r.ruc.CreateRoom(expectedRooms[0])
+
+	r.NotNil(err)
+	r.Empty(room)
 }
 
-func (suite *RoomUseCaseTestSuite) TestUpdateRoom_EmptyStatusSuccess() {
-	expectedPayload := expectedRoom
-	expectedPayload.Facilities = ""
+func (r *RoomUCSuite) TestUpdateRoom_success() {
+	r.rrm.On("GetRoomById", expectedRooms[0].Id).Return(expectedRooms[0], nil)
+	r.rrm.On("UpdateRoom", mock.Anything).Return(expectedRooms[0], nil)
 
-	suite.mockUsecase.On("UpdateRoom", expectedPayload).Return(dto.RoomResponse{
-		Id:         expectedPayload.Id,
-		CodeRoom:   expectedPayload.CodeRoom,
-		RoomType:   expectedPayload.RoomType,
-		Facilities: expectedPayload.Facilities,
-		Capacity:   expectedPayload.Capacity,
-	}, nil)
+	room, err := r.ruc.UpdateRoom(expectedRooms[0])
 
-	_, err := suite.uc.UpdateRoom(expectedRoom)
-	expectedRoom.Facilities = "available"
-
-	assert.Nil(suite.T(), err)
-	assert.NoError(suite.T(), err)
+	r.Nil(err)
+	r.Equal(common.RoomModelToResponse(expectedRooms[0]), room)
 }
 
-const someError = Error("some error")
+func (r *RoomUCSuite) TestUpdateRoom_failure() {
+	r.rrm.On("GetRoomById", expectedRooms[0].Id).Return(model.RoomModel{}, fmt.Errorf("error"))
 
-type Error string
+	room, err := r.ruc.UpdateRoom(expectedRooms[0])
 
-func (e Error) Error() string {
-	return string(e)
-}
-
-func TestRoomUseCaseTestSuite(t *testing.T) {
-	suite.Run(t, new(RoomUseCaseTestSuite))
+	r.NotNil(err)
+	r.Equal(dto.RoomResponse{}, room)
 }

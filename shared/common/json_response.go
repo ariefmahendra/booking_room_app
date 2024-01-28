@@ -3,6 +3,7 @@ package common
 import (
 	"booking-room/shared/shared_model"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -42,16 +43,6 @@ func SendListResponse(c *gin.Context, data interface{}, message string) {
 	c.JSON(http.StatusOK, &shared_model.ListResponse{
 		Status: shared_model.Status{
 			Code:    http.StatusOK,
-			Message: message,
-		},
-		Data: data,
-	})
-}
-
-func SendCreateResponse(ctx *gin.Context, data interface{}, message string) {
-	ctx.JSON(http.StatusCreated, shared_model.SingleResponse{
-		Status: shared_model.Status{
-			Code:    http.StatusCreated,
 			Message: message,
 		},
 		Data: data,
