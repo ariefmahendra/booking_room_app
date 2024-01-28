@@ -33,8 +33,8 @@ func (r *ReportController) Route() {
 
 func (r *ReportController) GetReport(c *gin.Context) {
 	claims := r.middleware.GetUser(c)
-	if ok := common.AuthorizationAdmin(claims); ok == false {
-		log.Println("unauthorized access")
+	if ok := common.AuthorizationAdmin(claims); !ok {
+		log.Println("Authorization failed because user is not admin")
 		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
 		return
 	}

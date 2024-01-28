@@ -65,7 +65,7 @@ func (t *TrxRsvController) getID(c *gin.Context) {
 
 func (t *TrxRsvController) getEmployee(c *gin.Context) {
 	claims := t.middleware.GetUser(c)
-	if ok := common.AuthorizationGaAdmin(claims); ok == false {
+	if ok := common.AuthorizationGaAdmin(claims); !ok {
 		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -105,7 +105,7 @@ func (t *TrxRsvController) createRSVP(c *gin.Context) {
 
 func (t *TrxRsvController) acceptRSVP(c *gin.Context) {
 	claims := t.middleware.GetUser(c)
-	if ok := common.AuthorizationGa(claims); ok == false {
+	if ok := common.AuthorizationGa(claims); !ok {
 		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -148,7 +148,7 @@ func (t *TrxRsvController) deleteRSVP(c *gin.Context) {
 
 func (t *TrxRsvController) getApprove(c *gin.Context) {
 	claims := t.middleware.GetUser(c)
-	if ok := common.AuthorizationGa(claims); ok == false {
+	if ok := common.AuthorizationGa(claims); !ok {
 		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
 		return
 	}

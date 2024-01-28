@@ -7,9 +7,10 @@ import (
 	"booking-room/shared/service"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthUC interface {
@@ -66,7 +67,6 @@ func (a *AuthUCImpl) Login(request dto.AuthRequest) (dto.AuthResponse, error) {
 		return dto.AuthResponse{}, errors.New("invalid email or email")
 	}
 
-	fmt.Println("Auth usecase : ", userByEmail.Id)
 	authResponse, err := a.jwtService.GenerateToken(userByEmail.Id, userByEmail.Email, userByEmail.Role)
 	if err != nil {
 		return dto.AuthResponse{}, err

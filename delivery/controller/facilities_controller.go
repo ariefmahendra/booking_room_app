@@ -5,6 +5,7 @@ import (
 	"booking-room/model"
 	"booking-room/shared/common"
 	"booking-room/usecase"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -35,8 +36,6 @@ func (f *FacilitiesController) FindAllFacilities(c *gin.Context) {
 		return
 	}
 	common.SendSuccessPagedResponse(c, http.StatusOK, facilities, paging)
-	return
-
 }
 
 // FindFacilityById Get facility by id
@@ -102,8 +101,8 @@ func (f *FacilitiesController) FindFacilityByType(c *gin.Context) {
 // CreateFacility Create new facility
 func (f *FacilitiesController) CreateFacility(c *gin.Context) {
 	claims := f.middleware.GetUser(c)
-	isOk := common.AuthorizationAdmin(claims)
-	if !isOk {
+	if ok := common.AuthorizationAdmin(claims); !ok {
+		log.Println("authorization failed because user is not admin")
 		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
 		return
 	}
@@ -124,8 +123,8 @@ func (f *FacilitiesController) CreateFacility(c *gin.Context) {
 // UpdateFacility Update facility
 func (f *FacilitiesController) UpdateFacility(c *gin.Context) {
 	claims := f.middleware.GetUser(c)
-	isOk := common.AuthorizationAdmin(claims)
-	if !isOk {
+	if ok := common.AuthorizationAdmin(claims); !ok {
+		log.Println("authorization failed because user is not admin")
 		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
 		return
 	}
@@ -147,8 +146,8 @@ func (f *FacilitiesController) UpdateFacility(c *gin.Context) {
 // DeleteFacility Delete facility by id
 func (f *FacilitiesController) DeleteFacility(c *gin.Context) {
 	claims := f.middleware.GetUser(c)
-	isOk := common.AuthorizationAdmin(claims)
-	if !isOk {
+	if ok := common.AuthorizationAdmin(claims); !ok {
+		log.Println("authorization failed because user is not admin")
 		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
 		return
 	}
@@ -164,6 +163,13 @@ func (f *FacilitiesController) DeleteFacility(c *gin.Context) {
 
 // DeleteFacilityByName Delete facility by name
 func (f *FacilitiesController) DeleteFacilityByName(c *gin.Context) {
+	claims := f.middleware.GetUser(c)
+	if ok := common.AuthorizationAdmin(claims); !ok {
+		log.Println("authorization failed because user is not admin")
+		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
+		return
+	}
+
 	name := strings.ToUpper(c.Param("codeName"))
 	err := f.facilitiesUsecase.DeleteByName(name)
 	if err != nil {
@@ -176,8 +182,8 @@ func (f *FacilitiesController) DeleteFacilityByName(c *gin.Context) {
 // FindAllDeletedFacilities Get deleted facilities
 func (f *FacilitiesController) FindAllDeletedFacilities(c *gin.Context) {
 	claims := f.middleware.GetUser(c)
-	isOk := common.AuthorizationAdmin(claims)
-	if !isOk {
+	if ok := common.AuthorizationAdmin(claims); !ok {
+		log.Println("authorization failed because user is not admin")
 		common.SendErrorResponse(c, http.StatusForbidden, "forbidden")
 		return
 	}
