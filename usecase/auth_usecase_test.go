@@ -85,7 +85,7 @@ func (a *AuthUCSuite) TestLogin_success() {
 
 	a.erm.On("GetEmployeeByEmail", authRequest.Email).Return(expectedEmployees[0], nil)
 
-	a.jwtServiceMock.On("GenerateToken", expectedEmployees[0].Id, expectedEmployees[0].Role).Return(authResponse, nil)
+	a.jwtServiceMock.On("GenerateToken", expectedEmployees[0].Id, expectedEmployees[0].Email, expectedEmployees[0].Role).Return(authResponse, nil)
 
 	response, err := a.authUC.Login(authRequest)
 

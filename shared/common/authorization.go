@@ -28,3 +28,5 @@ func AuthorizationGaAdmin(claims *shared_model.CustomClaims) bool {
 
 	return true
 }
+
+//employee_management_api.md

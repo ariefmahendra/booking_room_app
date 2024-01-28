@@ -4,6 +4,7 @@ import (
 	"booking-room/mocks/repo_mock"
 	"booking-room/model/dto"
 	"booking-room/shared/shared_model"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -65,7 +66,7 @@ func pointerTime(timeStr string) *time.Time {
 	return &parsedTime
 }
 
-type TrxRsvUsecaseSuite struct {
+type TrxRsvUsecaseTestSuite struct {
 	suite.Suite
 	trm *repo_mock.RsvRepoMock
 	rrm *repo_mock.RoomRepositoryMock
@@ -73,14 +74,14 @@ type TrxRsvUsecaseSuite struct {
 	tuc TrxRsvUsecase
 }
 
-func (s *TrxRsvUsecaseSuite) SetupTest() {
+func (s *TrxRsvUsecaseTestSuite) SetupTest() {
 	s.trm = new(repo_mock.RsvRepoMock)
 	s.rrm = new(repo_mock.RoomRepositoryMock)
 	s.ruc = NewRoomUseCase(s.rrm)
 	s.tuc = NewTrxRsvUseCase(s.trm, s.ruc)
 }
 
-func (s *TrxRsvUsecaseSuite) TestList() {
+func (s *TrxRsvUsecaseTestSuite) TestList() {
 	s.trm.On("List", 1, 5).Return([]dto.TransactionDTO{expectedList}, shared_model.Paging{}, nil)
 
 	actual, _, err := s.tuc.List(1, 5)
@@ -89,7 +90,7 @@ func (s *TrxRsvUsecaseSuite) TestList() {
 	s.Equal(expectedList, actual[0])
 }
 
-func (s *TrxRsvUsecaseSuite) TestGetID_Success() {
+func (s *TrxRsvUsecaseTestSuite) TestGetID_Success() {
 	s.trm.On("GetID", expectedList.Id).Return(expectedList, nil)
 	actual, err := s.tuc.GetID(expectedList.Id)
 	s.NoError(err)
@@ -97,13 +98,13 @@ func (s *TrxRsvUsecaseSuite) TestGetID_Success() {
 	s.Equal(expectedList, actual)
 }
 
-func (s *TrxRsvUsecaseSuite) TestGetID_Failed() {
+func (s *TrxRsvUsecaseTestSuite) TestGetID_Failed() {
 	s.trm.On("GetID", expectedList.Id).Return(dto.TransactionDTO{}, nil)
 	_, err := s.tuc.GetID(expectedList.Id)
 	s.NoError(err)
 }
 
-func (s *TrxRsvUsecaseSuite) TestGetEmployee() {
+func (s *TrxRsvUsecaseTestSuite) TestGetEmployee_Success() {
 	s.trm.On("GetEmployee", expectedList.EmployeeId, 1, 5).Return([]dto.TransactionDTO{expectedList}, shared_model.Paging{}, nil)
 	actual, _, err := s.tuc.GetEmployee(expectedList.EmployeeId, 1, 5)
 	s.NoError(err)
@@ -111,12 +112,22 @@ func (s *TrxRsvUsecaseSuite) TestGetEmployee() {
 	s.Equal(expectedList, actual[0])
 }
 
-func (s *TrxRsvUsecaseSuite) TestPostReservation() {
+func (s *TrxRsvUsecaseTestSuite) TestGetEmployee_Failed() {
+    s.trm.On("GetEmployee", expectedList.EmployeeId, 1, 5).Return([]dto.TransactionDTO{}, shared_model.Paging{}, errors.New("some error"))
+    _, _, err := s.tuc.GetEmployee(expectedList.EmployeeId, 1, 5)
+    s.Error(err) 
+}
+
+func (s *TrxRsvUsecaseTestSuite) TestPostReservation() {
 	s.trm.On("PostReservation", tesTransactionDTO).Return("ID001", nil)
 	_, err := s.tuc.PostReservation(tesTransactionDTO)
 	s.NoError(err)
 }
 
+func (s *TrxRsvUsecaseTestSuite) TestUpdatedStatus() {
+	s.trm.On("UpdateStatus", )
+}
+
 func TestReservationTestSuite(t *testing.T) {
-	suite.Run(t, new(TrxRsvUsecaseSuite))
+	suite.Run(t, new(TrxRsvUsecaseTestSuite))
 }

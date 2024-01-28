@@ -35,10 +35,6 @@ func SendSuccessPagedResponse(ctx *gin.Context, code int, data any, paging share
 	})
 }
 
-func SendNoContentResponse(c *gin.Context) {
-	c.JSON(http.StatusNoContent, nil)
-}
-
 func SendListResponse(c *gin.Context, data interface{}, message string) {
 	c.JSON(http.StatusOK, &shared_model.ListResponse{
 		Status: shared_model.Status{

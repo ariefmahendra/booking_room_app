@@ -59,43 +59,43 @@ func (s *Server) Run() {
 }
 
 func NewServer() *Server {
-    cfg, err := config.NewConfig()
-    if err != nil {
-        panic(fmt.Errorf("config error : %v", err))
-    }
+	cfg, err := config.NewConfig()
+	if err != nil {
+		panic(fmt.Errorf("config error : %v", err))
+	}
 
-    db := config.ConnectDB()
+	db := config.ConnectDB()
 
-    roomRepository := repository.NewRoomRepository(db)
-    facilitiesRepository := repository.NewFacilitiesRepository(db)
-    employeeRepository := repository.NewEmployeeRepository(db)
-    trxRsvpRepo := repository.NewTrxRsvRepository(db)
-    reportRepo := repository.NewReportRepository(db)
+	roomRepository := repository.NewRoomRepository(db)
+	facilitiesRepository := repository.NewFacilitiesRepository(db)
+	employeeRepository := repository.NewEmployeeRepository(db)
+	trxRsvpRepo := repository.NewTrxRsvRepository(db)
+	reportRepo := repository.NewReportRepository(db)
 
-    faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
-    employeeUC := usecase.NewEmployeeUC(employeeRepository)
-    roomUC := usecase.NewRoomUseCase(roomRepository)
-    reportUC := usecase.NewReportUsecase(reportRepo)
-    roomUC = usecase.NewRoomUseCase(roomRepository)
-    trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo, roomUC)
+	faciltiiesUC := usecase.NewFacilitiesUsecase(facilitiesRepository)
+	employeeUC := usecase.NewEmployeeUC(employeeRepository)
+	roomUC := usecase.NewRoomUseCase(roomRepository)
+	reportUC := usecase.NewReportUsecase(reportRepo)
+	roomUC = usecase.NewRoomUseCase(roomRepository)
+	trxRsvpUC := usecase.NewTrxRsvUseCase(trxRsvpRepo, roomUC)
 
-    jwtService := service.NewJwtService(cfg.TokenConfig)
-    authUC := usecase.NewAuthUC(employeeRepository, jwtService)
+	jwtService := service.NewJwtService(cfg.TokenConfig)
+	authUC := usecase.NewAuthUC(employeeRepository, jwtService)
 
-    newMiddleware := middleware.NewMiddleware(jwtService)
+	newMiddleware := middleware.NewMiddleware(jwtService)
 
-    engine := gin.Default()
-    host := fmt.Sprintf(":%s", cfg.ApiPort)
+	engine := gin.Default()
+	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
-    return &Server{
-        middleware:   newMiddleware,
-        authUC:       authUC,
-        roomUC:       roomUC,
-        employeeUC:   employeeUC,
-        facilitiesUC: faciltiiesUC,
-        trxRsvpUC:    trxRsvpUC,
-        reportUC:     reportUC,
-        engine:       engine,
-        host:         host,
-    }
+	return &Server{
+		middleware:   newMiddleware,
+		authUC:       authUC,
+		roomUC:       roomUC,
+		employeeUC:   employeeUC,
+		facilitiesUC: faciltiiesUC,
+		trxRsvpUC:    trxRsvpUC,
+		reportUC:     reportUC,
+		engine:       engine,
+		host:         host,
+	}
 }

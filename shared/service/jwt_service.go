@@ -10,7 +10,7 @@ import (
 )
 
 type JwtService interface {
-	GenerateToken(employeeId, role string) (dto.AuthResponse, error)
+	GenerateToken(id, email, role string) (dto.AuthResponse, error)
 	ValidateToken(token string) (*shared_model.CustomClaims, error)
 }
 
@@ -18,16 +18,18 @@ type JwtServiceImpl struct {
 	cfg config.TokenConfig
 }
 
-func (j *JwtServiceImpl) GenerateToken(employeeId, role string) (dto.AuthResponse, error) {
-	claims := shared_model.CustomClaims{
-		AuthorId: employeeId,
-		Role:     role,
+func (j *JwtServiceImpl) GenerateToken(id, email, role string) (dto.AuthResponse, error) {
+	claims := &shared_model.CustomClaims{
+		Id:    id,
+		Email: email,
+		Role:  role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    j.cfg.IssuerName,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.cfg.JwtExpiredTime)),
 		},
 	}
+
 	token := jwt.NewWithClaims(j.cfg.JwtSigningMethod, claims)
 
 	tokenSigned, err := token.SignedString(j.cfg.JwtSecretKey)

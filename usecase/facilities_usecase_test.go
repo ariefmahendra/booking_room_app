@@ -25,7 +25,7 @@ var expectedFacility = model.Facilities{
 	UpdatedAt:      "2021-05-05",
 	DeletedAt:      "",
 }
-var expectedPagings = shared_model.Paging{
+var expectedPaging = shared_model.Paging{
 	Page:        1,
 	TotalPages:  5,
 	TotalRows:   10,

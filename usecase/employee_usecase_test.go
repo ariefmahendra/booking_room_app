@@ -7,10 +7,11 @@ import (
 	"booking-room/shared/common"
 	"booking-room/shared/shared_model"
 	"fmt"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 var now = time.Date(2024, 1, 27, 7, 12, 4, 692220000, time.Local)
