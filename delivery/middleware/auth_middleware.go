@@ -4,7 +4,6 @@ import (
 	"booking-room/shared/common"
 	"booking-room/shared/service"
 	"booking-room/shared/shared_model"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -69,7 +68,6 @@ func (m *Middleware) NewAuth(ctx *gin.Context) {
 
 func (m *Middleware) GetUser(ctx *gin.Context) *shared_model.CustomClaims {
 	user, exists := ctx.Get("ctx")
-	fmt.Println("user", user)
 	if !exists {
 		return nil
 	}

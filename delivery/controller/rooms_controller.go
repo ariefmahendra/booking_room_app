@@ -38,7 +38,8 @@ func (r *RoomController) getHandler(c *gin.Context) {
 
 func (r *RoomController) createHandler(c *gin.Context) {
 	claims := r.middleware.GetUser(c)
-	if ok := common.AuthorizationAdmin(claims); ok == false {
+	if ok := common.AuthorizationAdmin(claims); !ok {
+		log.Println("authorization failed because user is not admin")
 		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -62,7 +63,7 @@ func (r *RoomController) createHandler(c *gin.Context) {
 
 func (r *RoomController) updateHandler(c *gin.Context) {
 	claims := r.middleware.GetUser(c)
-	if ok := common.AuthorizationAdmin(claims); ok == false {
+	if ok := common.AuthorizationAdmin(claims); !ok {
 		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -105,12 +106,7 @@ func (r *RoomController) listHandler(c *gin.Context) {
 		return
 	}
 
-	response := gin.H{
-		"rooms":  rooms,
-		"paging": paging,
-	}
-
-	common.SendSuccessPagedResponse(c, http.StatusOK, response, paging)
+	common.SendSuccessPagedResponse(c, http.StatusOK, rooms, paging)
 }
 
 func NewRoomController(roomUC usecase.RoomUseCase, middleware *middleware.Middleware, rg *gin.RouterGroup) *RoomController {
