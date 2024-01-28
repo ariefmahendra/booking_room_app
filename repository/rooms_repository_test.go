@@ -14,10 +14,10 @@ import (
 
 var expectedRoom = []model.Room{
 	{
-		Id:         "12345",
-		CodeRoom:   "Room1",
-		RoomType:   "Training",
-		Facilities: "catering",
+		Id:         "6368ecf2-012e-42f4-b707-4482188f72e5",
+		CodeRoom:   "R001",
+		RoomType:   "Meeting Room",
+		Facilities: "Projector, Whiteboard, Audio System, Video Conferencing",
 		Capacity:   25,
 		CreatedAt:  now,
 		UpdatedAt:  now,

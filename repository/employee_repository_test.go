@@ -419,3 +419,4 @@ func (e *EmployeeRepositorySuite) TestGetDeletedEmployees_failure() {
 	e.Equal([]model.EmployeeModel(nil), employees)
 	e.Equal(shared_model.Paging{}, paging)
 }
+

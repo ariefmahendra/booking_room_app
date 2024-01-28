@@ -1,10 +1,10 @@
 package usecase_mock
 
 import (
-	"booking-room/model/dto"
-	"booking-room/shared/shared_model"
-
-	"github.com/stretchr/testify/mock"
+    "booking-room/model/dto"
+    "booking-room/shared/shared_model"
+    //"booking-room/repository"
+    "github.com/stretchr/testify/mock"
 )
 
 type RoomUsecaseMock struct {
@@ -30,7 +30,7 @@ func (m *RoomUsecaseMock) FindAllRoom(page, size int) ([]dto.RoomResponse, share
 }
 
 // UpdateRoom mocks the UpdateRoom method.
-func (m *RoomUsecaseMock) 	UpdateRoom(payload dto.RoomRequest) (dto.RoomResponse, error) {
+func (m *RoomUsecaseMock) UpdateRoom(payload dto.RoomRequest) (dto.RoomResponse, error) {
     args := m.Called(payload)
     return args.Get(0).(dto.RoomResponse), args.Error(1)
 }

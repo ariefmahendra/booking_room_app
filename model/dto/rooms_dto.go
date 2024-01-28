@@ -15,3 +15,4 @@ type RoomResponse struct {
 	Facilities string `json:"facilities"`
 	Capacity   int    `json:"capacity"`
 }
+

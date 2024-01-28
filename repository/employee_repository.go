@@ -155,3 +155,4 @@ func (e *EmployeeRepositoryImpl) GetEmployees(page, size int) ([]model.EmployeeM
 
 	return employees, paging, nil
 }
+
