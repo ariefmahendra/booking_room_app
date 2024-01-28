@@ -360,14 +360,14 @@ func (t *trxRsvRepository) GetEmployee(id string, page, size int) ([]dto.Transac
 
 	totalRows := 0
 	queryRow := "SELECT COUNT(*) FROM tx_room_reservation WHERE employee_id = $1"
-	if err := t.db.QueryRow(queryRow, id).Scan(&totalRows); err != nil {
-		return nil, shared_model.Paging{}, err
+	if err = t.db.QueryRow(queryRow, id).Scan(&totalRows); err != nil {
+		return nil, shared_model.Paging{}, fmt.Errorf("GetEmployees.Repository : %v", err)
 	}
 
 	paging := shared_model.Paging{
 		Page:        page,
-		RowsPerPage: page,
-		TotalRows:   page,
+		RowsPerPage: size,
+		TotalRows:   totalRows,
 		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 
@@ -512,14 +512,15 @@ func (t *trxRsvRepository) List(page, size int) ([]dto.TransactionDTO, shared_mo
 	}
 
 	totalRows := 0
-	if err := t.db.QueryRow("SELECT COUNT(*) FROM tx_room_reservation").Scan(&totalRows); err != nil {
-		return nil, shared_model.Paging{}, err
+	query ="SELECT COUNT(*) FROM tx_room_reservation WHERE deleted_at IS NULL"
+	if err = t.db.QueryRow(query).Scan(&totalRows); err != nil {
+		return nil, shared_model.Paging{}, fmt.Errorf("GetReservarion.Repository : %v", err)
 	}
 
 	paging := shared_model.Paging{
 		Page:        page,
-		RowsPerPage: page,
-		TotalRows:   page,
+		RowsPerPage: size,
+		TotalRows:   totalRows,
 		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 
