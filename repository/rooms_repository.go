@@ -22,7 +22,7 @@ type roomRepository struct {
 func (r *roomRepository) CreateRoom(payload model.Room) (model.Room, error) {
 	var room model.Room
 
-	err := r.db.QueryRow(config.CreateRoom, payload.CodeRoom, payload.RoomType, payload.Capacity, payload.Facilities).Scan(&room.Id, &room.CodeRoom, &room.RoomType, &room.Capacity, &room.Facilities, &room.CreatedAt, &room.UpdatedAt, &room.DeletedAt)
+	err := r.db.QueryRow(config.CreateRoom, payload.CodeRoom, payload.RoomType, payload.Capacity, payload.Facilities).Scan(&room.Id, &room.CodeRoom, &room.RoomType, &room.Facilities, &room.Capacity, &room.CreatedAt, &room.UpdatedAt, &room.DeletedAt)
 
 	if err != nil {
 		return model.Room{}, err
@@ -34,8 +34,8 @@ func (r *roomRepository) CreateRoom(payload model.Room) (model.Room, error) {
 func (r *roomRepository) UpdateRoom(payload model.Room) (model.Room, error) {
 	var room model.Room
 
-	err := r.db.QueryRow(config.UpdateRoomByID, room.Id, payload.CodeRoom, payload.RoomType, payload.Capacity, payload.Facilities).
-		Scan(&room.Id, &room.CodeRoom, &room.RoomType, &room.Capacity, &room.Facilities, &room.CreatedAt, &room.UpdatedAt, &room.DeletedAt)
+	err := r.db.QueryRow(config.UpdateRoomByID, payload.Id, payload.CodeRoom, payload.RoomType, payload.Capacity, payload.Facilities).
+		Scan(&room.Id, &room.CodeRoom, &room.RoomType, &room.Facilities, &room.Capacity, &room.CreatedAt, &room.UpdatedAt, &room.DeletedAt)
 
 	if err != nil {
 		return model.Room{}, err

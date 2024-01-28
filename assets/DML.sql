@@ -33,6 +33,17 @@ INSERT INTO tx_room_reservation (employee_id, room_id, start_date, end_date, not
 VALUES
     ((SELECT id FROM mst_employee WHERE email = 'budi@mail.com'),
      (SELECT id FROM mst_room WHERE code_room = 'R001'),
+<<<<<<< HEAD
+     '2024-01-25 09:00:00', '2024-01-27 11:00:00', 'Team Meeting', 'ACCEPT', 'Approved'),
+
+    ((SELECT id FROM mst_employee WHERE email = 'agung@mail.com'),
+     (SELECT id FROM mst_room WHERE code_room = 'R002'),
+     '2024-01-26 14:00:00', '2024-01-26 16:00:00', 'Interview', 'PENDING', ''),
+
+    ((SELECT id FROM mst_employee WHERE email = 'boby@mail.com'),
+    (SELECT id FROM mst_room WHERE code_room = 'R003'),
+    '2024-01-27 10:00:00', '2024-01-27 12:00:00', 'Training Session', 'DECLINE', 'Not available for booking');
+=======
      '2024-01-25 09:00:00', '2024-01-27 11:00:00', 'Team Meeting', 'ACCEPT', 'Department Briefing'),
 
     ((SELECT id FROM mst_employee WHERE email = 'agung@mail.com'),
@@ -42,10 +53,21 @@ VALUES
     ((SELECT id FROM mst_employee WHERE email = 'boby@mail.com'),
     (SELECT id FROM mst_room WHERE code_room = 'R003'),
     '2024-01-27 10:00:00', '2024-01-27 12:00:00', 'Training Session', 'DECLINE', 'Board Meeting');
+>>>>>>> ed7e6ada7c231957f8498b03fd926752a5f88f1d
 
 -- Insert data into tx_additional
 INSERT INTO tx_additional (reservation_id, facilities_id)
 VALUES
+<<<<<<< HEAD
+    ((SELECT id FROM tx_room_reservation WHERE code_room = 'R001'),
+     (SELECT id FROM mst_facilities WHERE code_name = 'PRJ3')),
+
+    ((SELECT id FROM tx_room_reservation WHERE code_room = 'R002'),
+     (SELECT id FROM mst_facilities WHERE code_name = 'SCR1')),
+
+    ((SELECT id FROM tx_room_reservation WHERE code_room = 'R003'),
+     (SELECT id FROM mst_facilities WHERE code_name = 'SCR2')),
+=======
     ((SELECT id FROM tx_room_reservation WHERE approval_note = 'Department Briefing'),
      (SELECT id FROM mst_facilities WHERE code_name = 'PRJ3')),
 
@@ -54,3 +76,4 @@ VALUES
 
     ((SELECT id FROM tx_room_reservation WHERE approval_note = 'Board Meeting'),
      (SELECT id FROM mst_facilities WHERE code_name = 'SCR2'));
+>>>>>>> ed7e6ada7c231957f8498b03fd926752a5f88f1d
