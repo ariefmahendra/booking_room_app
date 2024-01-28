@@ -64,11 +64,11 @@ func (t *TrxRsvController) getID(c *gin.Context) {
 }
 
 func (t *TrxRsvController) getEmployee(c *gin.Context) {
-	claims := t.middleware.GetUser(c)
-	if ok := common.AuthorizationGaAdmin(claims); ok == false {
-		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
-		return
-	}
+	// claims := t.middleware.GetUser(c)
+	// if ok := common.AuthorizationGaAdmin(claims); ok == false {
+	// 	common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+	// 	return
+	// }
 
 	id := c.Param("id")
 	page, _ := strconv.Atoi(c.Query("page"))
@@ -104,11 +104,11 @@ func (t *TrxRsvController) createRSVP(c *gin.Context) {
 }
 
 func (t *TrxRsvController) acceptRSVP(c *gin.Context) {
-	claims := t.middleware.GetUser(c)
-	if ok := common.AuthorizationGa(claims); ok == false {
-		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
-		return
-	}
+	// claims := t.middleware.GetUser(c)
+	// if ok := common.AuthorizationGa(claims); ok == false {
+	// 	common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+	// 	return
+	// }
 
 	var acc dto.TransactionDTO
 	if err := c.ShouldBindJSON(&acc); err != nil {
@@ -147,11 +147,11 @@ func (t *TrxRsvController) deleteRSVP(c *gin.Context) {
 }
 
 func (t *TrxRsvController) getApprove(c *gin.Context) {
-	claims := t.middleware.GetUser(c)
-	if ok := common.AuthorizationGa(claims); ok == false {
-		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
-		return
-	}
+	// claims := t.middleware.GetUser(c)
+	// if ok := common.AuthorizationGa(claims); ok == false {
+	// 	common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+	// 	return
+	// }
 
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))

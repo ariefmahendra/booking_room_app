@@ -17,6 +17,7 @@ func TxQuery(db *sql.DB, payload model.Transaction) (string) {
 	idTrx := insertRSVP(payload, tx)
 	insertFacility(payload, tx, idTrx)
 
+	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
 		log.Println(err, "Transaction Rollback!")

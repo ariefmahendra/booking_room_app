@@ -414,7 +414,7 @@ func (t *trxRsvRepository) GetID(id string) (dto.TransactionDTO, error) {
 		&trx.UpdateAt,
 		&trx.DeleteAt,
 	); err != nil {
-		log.Println("trxRepository.QueryRow", err.Error())
+		log.Println("trxRepositoryGetId.QueryRow", err.Error())
 		return dto.TransactionDTO{}, err
 	}
 	queryFacility := `

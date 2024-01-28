@@ -50,9 +50,9 @@ var expectedList = dto.TransactionDTO{
 
 var expectedPage = shared_model.Paging{
 	Page:        1,
-	TotalPages:  3,
+	TotalPages:  5,
 	TotalRows:   1,
-	RowsPerPage: 1,
+	RowsPerPage: 5,
 }
 
 var tesTransactionDTO = dto.PayloadReservationDTO{
