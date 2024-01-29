@@ -49,7 +49,7 @@ func (r *ReportController) GetReport(c *gin.Context) {
 		start = now.AddDate(0, -1, 0)
 	}
 	if end.IsZero() {
-		end = now.AddDate(0, 1, 0)
+		end = now
 	}
 	employee, room, facilities, reserve, totalFacility, totalRoom, err := r.reportUsecase.GetReport(start, end)
 	if err != nil {
@@ -63,11 +63,15 @@ func (r *ReportController) GetReport(c *gin.Context) {
 	sheet.AddRow()
 	title := sheet.AddRow()
 	title.AddCell().SetString("Report Booking Room")
+	title.AddCell().SetString("From")
 	title.AddCell().SetDateTime(start)
+	title.AddCell().SetString("To")
 	title.AddCell().SetDateTime(end)
 	sheet.AddRow()
 
 	//create header employee
+	titleE := sheet.AddRow()
+	titleE.AddCell().SetString("Employee List")
 	headerEmployee := sheet.AddRow()
 	headerEmployee.AddCell().SetString("Name")
 	headerEmployee.AddCell().SetString("Email")
@@ -90,6 +94,8 @@ func (r *ReportController) GetReport(c *gin.Context) {
 	sheet.AddRow()
 
 	//create header room
+	titleR := sheet.AddRow()
+	titleR.AddCell().SetString("Room List")
 	headerRoom := sheet.AddRow()
 	headerRoom.AddCell().SetString("Code Room")
 	headerRoom.AddCell().SetString("Room Type")
@@ -108,6 +114,8 @@ func (r *ReportController) GetReport(c *gin.Context) {
 	sheet.AddRow()
 
 	//create header facilities
+	titleF := sheet.AddRow()
+	titleF.AddCell().SetString("Facilities List")
 	headerFacilities := sheet.AddRow()
 	headerFacilities.AddCell().SetString("Code Facilities")
 	headerFacilities.AddCell().SetString("Facilities Type")
@@ -124,6 +132,8 @@ func (r *ReportController) GetReport(c *gin.Context) {
 	sheet.AddRow()
 
 	//create header reservation
+	titleRsv := sheet.AddRow()
+	titleRsv.AddCell().SetString("Reservation List")
 	headerReservation := sheet.AddRow()
 	headerReservation.AddCell().SetString("Reservation ID")
 	headerReservation.AddCell().SetString("Employee Name")
@@ -150,6 +160,8 @@ func (r *ReportController) GetReport(c *gin.Context) {
 	sheet.AddRow()
 
 	//create header total facility booked
+	titleTf := sheet.AddRow()
+	titleTf.AddCell().SetString("Total facilities Booked")
 	headerTotalFacility := sheet.AddRow()
 	headerTotalFacility.AddCell().SetString("Facility Type")
 	headerTotalFacility.AddCell().SetString("Total")
@@ -164,6 +176,8 @@ func (r *ReportController) GetReport(c *gin.Context) {
 	sheet.AddRow()
 
 	//create header total room booked
+	titleTr := sheet.AddRow()
+	titleTr.AddCell().SetString("Total facilities Booked")
 	headerTotalRoom := sheet.AddRow()
 	headerTotalRoom.AddCell().SetString("Room Type")
 	headerTotalRoom.AddCell().SetString("Total")
