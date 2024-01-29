@@ -37,3 +37,15 @@ Explore the Guest API for a comprehensive understanding of its functionalities a
 Discover the Employee Management API to seamlessly control and manage your workforce. Dive into its details for efficient employee administration.
 
 - [Employee Management API Documentation](/api/employee_management_api.md)
+
+## Room Management API
+
+Discover the Room Management API to streamline your room management. Gain insights into your room inventory and optimize your operations.
+
+- [Room Management API Documentation](/api/room_management_api.md)
+
+## Transaction Management API
+
+Discover the Transaction Management API to manage and monitor your bookings. Gain insights into your booking trends and optimize your operations.
+
+- [Transaction Management API Documentation](/api/reservation_management.md)
