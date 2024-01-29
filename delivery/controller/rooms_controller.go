@@ -2,6 +2,7 @@ package controller
 
 import (
 	"booking-room/delivery/middleware"
+	"booking-room/model"
 	"booking-room/model/dto"
 	"booking-room/shared/common"
 	"booking-room/usecase"
@@ -37,6 +38,10 @@ func (r *RoomController) getHandler(c *gin.Context) {
 }
 
 func (r *RoomController) createHandler(c *gin.Context) {
+	var payload model.Room
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		log.Println("Error binding JSON:", err.Error())
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 	claims := r.middleware.GetUser(c)
 	if ok := common.AuthorizationAdmin(claims); !ok {
 		log.Println("authorization failed because user is not admin")
@@ -60,12 +65,13 @@ func (r *RoomController) createHandler(c *gin.Context) {
 
 	common.SendSuccessResponse(c, http.StatusOK, room)
 }
+}
 
 func (r *RoomController) updateHandler(c *gin.Context) {
 	claims := r.middleware.GetUser(c)
 	if ok := common.AuthorizationAdmin(claims); !ok {
 		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
-		return
+		//return
 	}
 
 	var payload dto.RoomRequest

@@ -198,3 +198,4 @@ func (e *EmployeeUCSuite) TestUpdateEmployee_failure() {
 	e.NotNil(err)
 	e.Equal(dto.EmployeeResponse{}, employee)
 }
+

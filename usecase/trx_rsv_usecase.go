@@ -37,11 +37,6 @@ func (t *trxRsvUsecase) GetAvailableRoom(payload dto.PayloadAvailable) ([]dto.Ro
 	return rooms, nil
 }
 
-// UpdateResv implements TrxRsvUsecase.
-func (*trxRsvUsecase) UpdateResv(payload dto.PayloadReservationDTO) (dto.TransactionDTO, error) {
-	panic("unimplemented")
-}
-
 // GetApprovalList implements TrxRsvUsecase.
 func (t *trxRsvUsecase) GetApprovalList(page int, size int) ([]dto.TransactionDTO, shared_model.Paging, error) {
 	p, s := noneQuery(page, size)
