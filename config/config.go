@@ -39,7 +39,7 @@ type Config struct {
 func (c *Config) ConfigurationDB() error {
 	err := godotenv.Load()
 	if err != nil {
-		return fmt.Errorf("failed to load .env file")
+		return err
 	}
 
 	// config db
@@ -59,9 +59,9 @@ func (c *Config) ConfigurationDB() error {
 	// another config
 	tokenExpired, err := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME"))
 	if err != nil {
-		return fmt.Errorf("error loading .env file")
+		return err
 	}
-	
+
 	// config token
 	c.TokenConfig = TokenConfig{
 		IssuerName:       os.Getenv("ISSUER_NAME"),

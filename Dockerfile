@@ -1,16 +1,24 @@
-FROM golang:alpine as build-env
+# use official Golang image
+FROM golang:1.21.6-alpine3.19 as build
 
-RUN apk update && apk add git
+# set working directory
+WORKDIR /app
 
-WORKDIR /src
-
+# Copy the source code
 COPY . .
 
-RUN go mod tidy
-RUN go build -o booking-room
+# Download and install the dependencies
+RUN go get -d -v ./...
 
-FROM alpine
+# Build the Go app
+RUN go build -o api
+
+FROM alpine:3.19.0
+
 WORKDIR /app
-COPY --from=build-env /src/booking-room /app
+# Copy the binary from the build stage
+COPY --from=build /app/api .
+COPY --from=build /app/.env .
 
-ENTRYPOINT ./booking-room
+# Run the executable
+CMD ["./api"]
