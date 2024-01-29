@@ -130,7 +130,7 @@ func (f *facilitiesUsecase) Delete(id string) error {
 	if err := f.facilitiesRepository.Delete(id); err != nil {
 		return fmt.Errorf("Failed to delete facility")
 	}
-	return fmt.Errorf("Facility deleted")
+	return nil
 }
 
 // delete facility by name
@@ -142,7 +142,7 @@ func (f *facilitiesUsecase) DeleteByName(name string) error {
 	if err := f.facilitiesRepository.DeleteByName(name); err != nil {
 		return fmt.Errorf("Failed to delete facility")
 	}
-	return fmt.Errorf("Facility deleted")
+	return nil
 }
 
 // Get deleted facilities

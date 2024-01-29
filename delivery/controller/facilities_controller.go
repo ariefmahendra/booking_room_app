@@ -164,7 +164,7 @@ func (f *FacilitiesController) DeleteFacility(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	common.SendSuccessResponse(c, http.StatusOK, nil)
+	common.SendSuccessResponse(c, http.StatusOK, id+" has been deleted")
 }
 
 // DeleteFacilityByName Delete facility by name
@@ -182,7 +182,7 @@ func (f *FacilitiesController) DeleteFacilityByName(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	common.SendSuccessResponse(c, http.StatusOK, nil)
+	common.SendSuccessResponse(c, http.StatusOK, name+" has been deleted")
 }
 
 // FindAllDeletedFacilities Get deleted facilities
