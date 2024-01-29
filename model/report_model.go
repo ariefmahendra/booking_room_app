@@ -37,6 +37,7 @@ type ReservationReport struct {
 
 type AdditionalReport struct {
 	FacilitiesName string
+	FacilitieQty   int
 }
 type FacilityTotalReserved struct {
 	FacilityType string

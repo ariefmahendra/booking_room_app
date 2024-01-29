@@ -128,7 +128,7 @@ func (r *reportRepository) ReservationReport(start, end time.Time) ([]model.Rese
 		additionals := []model.AdditionalReport{}
 		for rows2.Next() {
 			var additional model.AdditionalReport
-			if err := rows2.Scan(&additional.FacilitiesName); err != nil {
+			if err := rows2.Scan(&additional.FacilitiesName, &additional.FacilitieQty); err != nil {
 				log.Println("reportRepository.FindAllReservationReportDetailAppend", err.Error())
 			}
 			additionals = append(additionals, additional)
@@ -191,6 +191,7 @@ func (r *reportRepository) RoomTotalReserved(start, end time.Time) ([]model.Room
 		if err := rows.Scan(&room.RoomType, &room.Total); err != nil {
 			log.Println("reportRepository.RoomTotalReserved", err.Error())
 		}
+		RoomTotalReserved = append(RoomTotalReserved, room)
 	}
 	return RoomTotalReserved, nil
 }

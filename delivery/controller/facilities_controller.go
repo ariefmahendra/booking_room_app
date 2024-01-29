@@ -43,7 +43,7 @@ func (f *FacilitiesController) FindFacilityById(c *gin.Context) {
 	id := c.Param("id")
 	facility, err := f.facilitiesUsecase.Get(id)
 	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	common.SendSuccessResponse(c, http.StatusOK, facility)
@@ -54,7 +54,7 @@ func (f *FacilitiesController) FindFacilityByName(c *gin.Context) {
 	name := strings.ToUpper(c.Param("codeName"))
 	facility, err := f.facilitiesUsecase.GetByName(name)
 	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	common.SendSuccessResponse(c, http.StatusOK, facility)
@@ -73,7 +73,7 @@ func (f *FacilitiesController) FindFacilityByStatus(c *gin.Context) {
 	}
 	facility, paging, err := f.facilitiesUsecase.GetByStatus(status, page, size)
 	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	common.SendSuccessPagedResponse(c, http.StatusOK, facility, paging)
@@ -92,7 +92,7 @@ func (f *FacilitiesController) FindFacilityByType(c *gin.Context) {
 	}
 	facility, paging, err := f.facilitiesUsecase.GetByType(ftype, page, size)
 	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	common.SendSuccessPagedResponse(c, http.StatusOK, facility, paging)
@@ -112,12 +112,18 @@ func (f *FacilitiesController) CreateFacility(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	CreateFacility, err := f.facilitiesUsecase.Create(payload)
-	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+	log.Printf(payload.CodeName)
+	log.Printf(payload.FacilitiesType)
+	if payload.CodeName == "" || payload.FacilitiesType == "" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "Facility Code Name and Facility Facilities Type cannot be empty")
 		return
 	}
-	common.SendSuccessResponse(c, http.StatusOK, CreateFacility)
+	CreateFacility, err := f.facilitiesUsecase.Create(payload)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	common.SendSuccessResponse(c, http.StatusCreated, CreateFacility)
 }
 
 // UpdateFacility Update facility
@@ -137,7 +143,7 @@ func (f *FacilitiesController) UpdateFacility(c *gin.Context) {
 	}
 	facility, err := f.facilitiesUsecase.Update(payload, id)
 	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	common.SendSuccessResponse(c, http.StatusOK, facility)
@@ -158,7 +164,7 @@ func (f *FacilitiesController) DeleteFacility(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	common.SendSuccessResponse(c, http.StatusOK, nil)
+	common.SendSuccessResponse(c, http.StatusOK, id+" has been deleted")
 }
 
 // DeleteFacilityByName Delete facility by name
@@ -176,7 +182,7 @@ func (f *FacilitiesController) DeleteFacilityByName(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	common.SendSuccessResponse(c, http.StatusOK, nil)
+	common.SendSuccessResponse(c, http.StatusOK, name+" has been deleted")
 }
 
 // FindAllDeletedFacilities Get deleted facilities
