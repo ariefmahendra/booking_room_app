@@ -38,6 +38,12 @@ func (t *TrxRsvController) Route() {
 }
 
 func (t *TrxRsvController) getAll(c *gin.Context) {
+	claims := t.middleware.GetUser(c)
+	if ok := common.AuthorizationGaAdmin(claims); !ok {
+		common.SendErrorResponse(c, http.StatusForbidden, "Forbidden")
+		return
+	}
+
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
 	list, paging, err := t.trxRsvpUC.List(page, size)

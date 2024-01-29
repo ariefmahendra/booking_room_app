@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-create database booking_room_db;
-=======
 CREATE DATABASE booking_room_db;
->>>>>>> ed7e6ada7c231957f8498b03fd926752a5f88f1d
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -73,8 +69,4 @@ CREATE TABLE tx_additional (
     deleted_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (reservation_id) REFERENCES tx_room_reservation(id),
     FOREIGN KEY (facilities_id) REFERENCES mst_facilities(id)
-<<<<<<< HEAD
 );
-=======
-);
->>>>>>> ed7e6ada7c231957f8498b03fd926752a5f88f1d

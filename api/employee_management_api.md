@@ -142,7 +142,7 @@ Response :
 }
 ```
 
-#### 5. Get Employee by ID {Admin}
+#### 5. Delete Employee by ID {Admin}
 
 Request :
 
