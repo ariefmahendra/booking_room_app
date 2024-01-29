@@ -1,5 +1,3 @@
-CREATE DATABASE booking_room_db;
-
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE role AS ENUM ('GA', 'ADMIN', 'EMPLOYEE');

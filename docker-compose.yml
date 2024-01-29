@@ -1,0 +1,40 @@
+version: '3.7'
+services:
+  database:
+    image: postgres:alpine
+    restart: unless-stopped
+    container_name: booking_room_db_pg
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_HOST=${DB_HOST}
+      - POSTGRES_PORT=${DB_PORT}
+    ports:
+      - "5432:5432"
+    volumes:
+      # copy sql script to create database
+      - ./sql/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      - ./gosync:/var/lib/postgresql/data
+    networks:
+      - booking_room
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - database
+    env_file:
+      - .env
+    environment:
+      - PORT=${PORT}
+    networks:
+      - booking_room
+    ports:
+      - "${PORT}:8080"
+volumes:
+  enigma:
+
+networks:
+  booking-room:

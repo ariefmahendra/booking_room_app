@@ -1,0 +1,1 @@
+CREATE DATABASE booking_room_db;
