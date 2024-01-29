@@ -123,7 +123,7 @@ func (f *FacilitiesController) CreateFacility(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	common.SendSuccessResponse(c, http.StatusOK, CreateFacility)
+	common.SendSuccessResponse(c, http.StatusCreated, CreateFacility)
 }
 
 // UpdateFacility Update facility

@@ -62,7 +62,7 @@ func (r *ReportController) GetReport(c *gin.Context) {
 
 	sheet.AddRow()
 	title := sheet.AddRow()
-	title.AddCell().SetString("Report Booking Room")
+	title.AddCell().SetString("Report Booking Room From ")
 	title.AddCell().SetString("From")
 	title.AddCell().SetDateTime(start)
 	title.AddCell().SetString("To")
@@ -209,5 +209,4 @@ func (r *ReportController) GetReport(c *gin.Context) {
 
 	//send file
 	c.File(fileName)
-
 }
