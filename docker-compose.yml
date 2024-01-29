@@ -7,14 +7,13 @@ services:
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
       - POSTGRES_HOST=${DB_HOST}
       - POSTGRES_PORT=${DB_PORT}
     ports:
       - "5432:5432"
     volumes:
       # copy sql script to create database
-      - ./sql/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      - ./assets/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
       - ./gosync:/var/lib/postgresql/data
     networks:
       - booking_room
@@ -34,7 +33,6 @@ services:
     ports:
       - "${PORT}:8080"
 volumes:
-  enigma:
-
+  gosync:
 networks:
-  booking-room:
+  booking_room:
