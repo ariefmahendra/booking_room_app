@@ -73,14 +73,11 @@ func (f *facilitiesUsecase) GetByType(ftype string, page, size int) ([]dto.Facil
 
 // usecase for creating new facility
 func (f *facilitiesUsecase) Create(payload model.Facilities) (dto.FacilitiesCreated, error) {
-	if payload.CodeName == "" || payload.FacilitiesType == "" {
-		return dto.FacilitiesCreated{}, fmt.Errorf("Facility Code Name and Facility Facilities Type cannot be empty")
-	}
 	payload.CodeName = strings.ToUpper(payload.CodeName)
 	payload.FacilitiesType = strings.ToLower(payload.FacilitiesType)
 	facility, err := f.facilitiesRepository.Create(payload)
 	if err != nil {
-		return dto.FacilitiesCreated{}, fmt.Errorf("Failed to register new facility")
+		return dto.FacilitiesCreated{}, fmt.Errorf("Code name %s already exist", payload.CodeName)
 	}
 	return facility, nil
 }
@@ -119,7 +116,7 @@ func (f *facilitiesUsecase) Update(payload model.Facilities, id string) (dto.Fac
 		/* if err.Code == "23505" {
 			return model.Facilities{}, fmt.Errorf("Facility Code Name or Facilities Type already exist")
 		} */
-		return dto.FacilitiesUpdated{}, fmt.Errorf("Failed to update facility")
+		return dto.FacilitiesUpdated{}, fmt.Errorf("Failed to update facility, Code Name need to be unique")
 	}
 	return facility, nil
 }
