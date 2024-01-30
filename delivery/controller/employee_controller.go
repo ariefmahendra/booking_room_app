@@ -30,8 +30,8 @@ func (e *EmployeeControllerImpl) Route() {
 	er.PATCH("/:id", e.UpdateEmployee)
 	er.DELETE("/:id", e.DeleteEmployee)
 	er.GET("/:id", e.GetEmployeeById)
-	er.GET("/", e.GetEmployeeByEmail)
-	er.GET("/email", e.GetEmployees)
+	er.GET("/email", e.GetEmployeeByEmail)
+	er.GET("/", e.GetEmployees)
 	er.GET("/deleted", e.GetDeletedEmployees)
 }
 
@@ -77,11 +77,9 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 		return
 	}
 
-	log.Printf("request : %v", employeeReq)
-
 	if err := e.validate.Struct(employeeReq); err != nil {
 		log.Printf("failed to validate create employee : %v", err)
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email or name")
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -116,7 +114,7 @@ func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 
 	if err := e.validate.Struct(employeeReq); err != nil {
 		log.Printf("failed to validate update employee : %v", err)
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email or name")
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid request body")
 		return
 	}
 

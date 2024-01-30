@@ -18,9 +18,9 @@ type EmployeeResponse struct {
 type EmployeeCreateRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password"`
+	Password string `json:"password" validate:"required,min=6,max=20"`
 	Division string `json:"division"`
 	Position string `json:"position"`
-	Role     string `json:"role"`
+	Role     string `json:"role" validate:"required"`
 	Contact  string `json:"contact"`
 }
