@@ -28,7 +28,7 @@ func (e *EmployeeControllerImpl) Route() {
 	er.PATCH("/:id", e.UpdateEmployee)
 	er.DELETE("/:id", e.DeleteEmployee)
 	er.GET("/:id", e.GetEmployeeById)
-	er.GET("/email/:email", e.GetEmployeeByEmail)
+	er.GET("/", e.GetEmployeeByEmail)
 	er.GET("/", e.GetEmployees)
 	er.GET("/deleted", e.GetDeletedEmployees)
 }
@@ -178,7 +178,7 @@ func (e *EmployeeControllerImpl) GetEmployeeByEmail(ctx *gin.Context) {
 	claims := e.middleware.GetUser(ctx)
 	ok := common.AuthorizationAdmin(claims)
 
-	employeeEmail := ctx.Param("email")
+	employeeEmail := ctx.Query("email")
 
 	if employeeEmail != claims.Email && !ok {
 		log.Println("authorization failed because user id not match and user is not admin")
