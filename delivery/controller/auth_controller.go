@@ -5,17 +5,19 @@ import (
 	"booking-room/shared/common"
 	"booking-room/usecase"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
 )
 
 type AuthControllerImpl struct {
-	authUC usecase.AuthUC
-	rg     *gin.RouterGroup
+	authUC   usecase.AuthUC
+	rg       *gin.RouterGroup
+	validate *validator.Validate
 }
 
-func NewAuthController(authUC usecase.AuthUC, rg *gin.RouterGroup) *AuthControllerImpl {
-	return &AuthControllerImpl{authUC: authUC, rg: rg}
+func NewAuthController(authUC usecase.AuthUC, rg *gin.RouterGroup, validate *validator.Validate) *AuthControllerImpl {
+	return &AuthControllerImpl{authUC: authUC, rg: rg, validate: validate}
 }
 
 func (a *AuthControllerImpl) Route() {
@@ -29,6 +31,12 @@ func (a *AuthControllerImpl) LoginController(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("failed to bind json : %v", err)
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "bad request")
+		return
+	}
+
+	if err := a.validate.Struct(payload); err != nil {
+		log.Printf("failed to validate : %v", err)
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email or password")
 		return
 	}
 
@@ -47,6 +55,12 @@ func (a *AuthControllerImpl) RegisterController(ctx *gin.Context) {
 	if err := ctx.BindJSON(&request); err != nil {
 		log.Printf("failed to bind json : %v", err)
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "bad request")
+		return
+	}
+
+	if err := a.validate.Struct(request); err != nil {
+		log.Printf("failed to validate : %v", err)
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email or name")
 		return
 	}
 

@@ -8,8 +8,8 @@ import (
 	"booking-room/shared/service"
 	"booking-room/usecase"
 	"fmt"
-
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type Server struct {
@@ -27,12 +27,14 @@ type Server struct {
 func (s *Server) InitRoute() {
 	s.engine.Use(s.middleware.NewAuth)
 
+	validate := validator.New()
+
 	ar := s.engine.Group("/api/v1/auth")
-	controller.NewAuthController(s.authUC, ar).Route()
+	controller.NewAuthController(s.authUC, ar, validate).Route()
 
 	// route for management employee
 	er := s.engine.Group("/api/v1/employees")
-	controller.NewEmployeeController(s.employeeUC, s.middleware, er).Route()
+	controller.NewEmployeeController(s.employeeUC, s.middleware, er, validate).Route()
 
 	// route for management room
 	rg := s.engine.Group("/api/v1/room")

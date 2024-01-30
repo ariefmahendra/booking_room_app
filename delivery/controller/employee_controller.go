@@ -5,6 +5,7 @@ import (
 	"booking-room/model/dto"
 	"booking-room/shared/common"
 	"booking-room/usecase"
+	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,10 +17,11 @@ type EmployeeControllerImpl struct {
 	employeeUC usecase.EmployeeUC
 	middleware *middleware.Middleware
 	rg         *gin.RouterGroup
+	validate   *validator.Validate
 }
 
-func NewEmployeeController(employeeUC usecase.EmployeeUC, middleware *middleware.Middleware, rg *gin.RouterGroup) *EmployeeControllerImpl {
-	return &EmployeeControllerImpl{employeeUC: employeeUC, middleware: middleware, rg: rg}
+func NewEmployeeController(employeeUC usecase.EmployeeUC, middleware *middleware.Middleware, rg *gin.RouterGroup, validate *validator.Validate) *EmployeeControllerImpl {
+	return &EmployeeControllerImpl{employeeUC: employeeUC, middleware: middleware, rg: rg, validate: validate}
 }
 
 func (e *EmployeeControllerImpl) Route() {
@@ -29,7 +31,7 @@ func (e *EmployeeControllerImpl) Route() {
 	er.DELETE("/:id", e.DeleteEmployee)
 	er.GET("/:id", e.GetEmployeeById)
 	er.GET("/", e.GetEmployeeByEmail)
-	er.GET("/", e.GetEmployees)
+	er.GET("/email", e.GetEmployees)
 	er.GET("/deleted", e.GetDeletedEmployees)
 }
 
@@ -68,7 +70,6 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 	}
 
 	var employeeReq dto.EmployeeCreateRequest
-
 	err := ctx.Bind(&employeeReq)
 	if err != nil {
 		log.Printf("failed to bind json create employee : %v", err)
@@ -76,13 +77,15 @@ func (e *EmployeeControllerImpl) CreateEmployee(ctx *gin.Context) {
 		return
 	}
 
-	employee := common.RequestToEmployeeModel(employeeReq)
+	log.Printf("request : %v", employeeReq)
 
-	if ok := common.ValidateEmail(employee.Email); !ok {
-		log.Printf("invalid email : %v", employee.Email)
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email")
+	if err := e.validate.Struct(employeeReq); err != nil {
+		log.Printf("failed to validate create employee : %v", err)
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email or name")
 		return
 	}
+
+	employee := common.RequestToEmployeeModel(employeeReq)
 
 	employeeDto, err := e.employeeUC.CreteEmployee(employee)
 	if err != nil {
@@ -111,16 +114,15 @@ func (e *EmployeeControllerImpl) UpdateEmployee(ctx *gin.Context) {
 		return
 	}
 
-	employee := common.RequestToEmployeeModel(employeeReq)
-
-	employeeId := ctx.Param("id")
-	employee.Id = employeeId
-
-	if ok := common.ValidateEmail(employee.Email); !ok {
-		log.Printf("invalid email : %v", employee.Email)
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email")
+	if err := e.validate.Struct(employeeReq); err != nil {
+		log.Printf("failed to validate update employee : %v", err)
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid email or name")
 		return
 	}
+
+	employee := common.RequestToEmployeeModel(employeeReq)
+	employeeId := ctx.Param("id")
+	employee.Id = employeeId
 
 	employeeDto, err := e.employeeUC.UpdateEmployee(employee)
 	if err != nil {

@@ -14,7 +14,7 @@ CREATE TABLE mst_employee (
     division VARCHAR(100),
     position VARCHAR(100),
     role role,
-    contact VARCHAR(15),
+    contact VARCHAR(15) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP DEFAULT NULL

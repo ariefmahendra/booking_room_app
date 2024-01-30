@@ -29,7 +29,6 @@ func NewEmployeeUC(employeeRepo repository.EmployeeRepository) EmployeeUC {
 }
 
 func (e *EmployeeUCImpl) GetDeletedEmployees(page, size int) ([]dto.EmployeeResponse, shared_model.Paging, error) {
-	// default value for page and size
 	if page == 0 && size == 0 {
 		page, size = 1, 5
 	}

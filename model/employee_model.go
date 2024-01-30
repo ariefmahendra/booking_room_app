@@ -4,8 +4,8 @@ import "time"
 
 type EmployeeModel struct {
 	Id        string
-	Name      string
 	Email     string
+	Name      string
 	Password  string
 	Division  string
 	Position  string
